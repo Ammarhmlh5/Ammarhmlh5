@@ -55,6 +55,40 @@
             padding: 10px 15px;
             border-radius: 20px;
             backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 250px;
+        }
+
+        .company-selector {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: white;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        .company-selector option {
+            background: #667eea;
+            color: white;
+        }
+
+        .current-company {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .user-details {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: space-between;
         }
 
         .logout-btn {
@@ -292,6 +326,123 @@
             border: 2px solid #667eea;
         }
 
+        /* Transaction and Admin Styles */
+        .transactions-list, .admin-stats, .companies-management, .activity-logs {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h4 {
+            margin: 0 0 5px 0;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .transaction-item, .company-item, .log-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .transaction-item .electronic-number {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .company-item .company-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .subscription-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .subscription-status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .subscription-status.suspended {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
         .form-row {
             display: flex;
             gap: 20px;
@@ -366,8 +517,16 @@
         <div class="header">
             <!-- User Info and Logout -->
             <div id="userInfo" class="user-info" style="display: none;">
-                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
-                <span id="userEmail">البريد الإلكتروني</span>
+                <div class="current-company" id="currentCompany">لم يتم اختيار شركة</div>
+                
+                <select class="company-selector" id="companySelector" onchange="switchCompany()" style="display: none;">
+                    <option value="">اختر الشركة...</option>
+                </select>
+                
+                <div class="user-details">
+                    <span id="userEmail">البريد الإلكتروني</span>
+                    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                </div>
             </div>
             
             <h1>نظام إدارة المستخدمين والشركات</h1>
@@ -381,6 +540,8 @@
                 <button class="tab-button" onclick="showTab('company-tab')">تسجيل شركة جديدة</button>
                 <button class="tab-button" onclick="showTab('login-tab')">تسجيل الدخول</button>
                 <button class="tab-button" onclick="showTab('password-tab')">إدارة كلمة المرور</button>
+                <button class="tab-button" id="transactions-tab-btn" onclick="showTab('transactions-tab')" style="display: none;">المعاملات المالية</button>
+                <button class="tab-button" id="admin-tab-btn" onclick="showTab('admin-tab')" style="display: none;">لوحة المدير</button>
             </div>
 
             <!-- User Registration Tab -->
@@ -606,6 +767,106 @@
                                 تغيير كلمة المرور
                             </button>
                         </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Transactions Tab -->
+            <div id="transactions-tab" class="tab-content">
+                <div class="auth-section">
+                    <h2>إدارة المعاملات المالية</h2>
+                    
+                    <div id="transaction-message"></div>
+                    
+                    <!-- Transaction Form -->
+                    <div id="transactionSection">
+                        <h3>إضافة معاملة مالية جديدة</h3>
+                        <form id="transactionForm">
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="transactionType">نوع المعاملة *</label>
+                                        <select id="transactionType" name="transaction_type" required>
+                                            <option value="">-- اختر نوع المعاملة --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="transactionAmount">المبلغ *</label>
+                                        <input type="number" id="transactionAmount" name="amount" required placeholder="أدخل المبلغ" step="0.01" min="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="transactionDescription">وصف المعاملة *</label>
+                                <textarea id="transactionDescription" name="description" required placeholder="أدخل وصف المعاملة" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="transactionDate">تاريخ المعاملة *</label>
+                                        <input type="date" id="transactionDate" name="transaction_date" required>
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="referenceNumber">الرقم المرجعي</label>
+                                        <input type="text" id="referenceNumber" name="reference_number" placeholder="رقم مرجعي اختياري">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn">
+                                حفظ المعاملة
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Transactions List -->
+                    <div class="transactions-list">
+                        <h3>المعاملات الحديثة</h3>
+                        <div id="transactionsList">
+                            <div class="loading">جاري تحميل المعاملات...</div>
+                        </div>
+                        <button class="btn refresh-btn" onclick="loadTransactions()">تحديث القائمة</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin Panel Tab -->
+            <div id="admin-tab" class="tab-content">
+                <div class="auth-section">
+                    <h2>لوحة مدير النظام</h2>
+                    
+                    <div id="admin-message"></div>
+                    
+                    <!-- System Statistics -->
+                    <div class="admin-stats">
+                        <h3>إحصائيات النظام</h3>
+                        <div id="systemStats" class="stats-grid">
+                            <div class="loading">جاري تحميل الإحصائيات...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Companies Management -->
+                    <div class="companies-management">
+                        <h3>إدارة الشركات والاشتراكات</h3>
+                        <div id="companiesManagement">
+                            <div class="loading">جاري تحميل الشركات...</div>
+                        </div>
+                        <button class="btn refresh-btn" onclick="loadCompaniesManagement()">تحديث القائمة</button>
+                    </div>
+                    
+                    <!-- Activity Logs -->
+                    <div class="activity-logs">
+                        <h3>سجل نشاط المديرين</h3>
+                        <div id="activityLogs">
+                            <div class="loading">جاري تحميل السجلات...</div>
+                        </div>
+                        <button class="btn refresh-btn" onclick="loadActivityLogs()">تحديث السجلات</button>
                     </div>
                 </div>
             </div>
@@ -906,6 +1167,22 @@
                 const result = await response.json();
                 
                 if (result.success) {
+                    // Clear multi-tenant context
+                    if (typeof currentUser !== 'undefined') currentUser = null;
+                    if (typeof currentCompanyId !== 'undefined') currentCompanyId = null;
+                    if (typeof accessibleCompanies !== 'undefined') accessibleCompanies = [];
+                    
+                    // Update UI
+                    const userInfoEl = document.getElementById('userInfo');
+                    const currentCompanyEl = document.getElementById('currentCompany');
+                    const companySelectorEl = document.getElementById('companySelector');
+                    
+                    if (userInfoEl) userInfoEl.style.display = 'none';
+                    if (currentCompanyEl) currentCompanyEl.textContent = 'لم يتم اختيار شركة';
+                    if (companySelectorEl) companySelectorEl.style.display = 'none';
+                    
+                    if (typeof hideCompanySpecificTabs === 'function') hideCompanySpecificTabs();
+                    
                     updateUIForLoggedOutUser();
                     showMessage('تم تسجيل الخروج بنجاح', 'success', 'login-message');
                 }
@@ -1145,6 +1422,367 @@
             const errorDiv = field.parentNode.querySelector('.field-error');
             if (errorDiv) errorDiv.remove();
         }
+
+        // Company and Multi-tenant Functions
+        // Note: currentUser is already declared earlier in the code
+        let currentCompanyId = null;
+        let accessibleCompanies = [];
+
+        // Load accessible companies for current user
+        async function loadAccessibleCompanies() {
+            try {
+                const response = await fetch('/api/auth/accessible-companies');
+                const result = await response.json();
+                
+                if (result.success) {
+                    accessibleCompanies = result.companies;
+                    updateCompanySelector();
+                } else {
+                    console.error('Failed to load accessible companies:', result.message);
+                }
+            } catch (error) {
+                console.error('Error loading accessible companies:', error);
+            }
+        }
+
+        // Update company selector dropdown
+        function updateCompanySelector() {
+            const selector = document.getElementById('companySelector');
+            selector.innerHTML = '<option value="">اختر الشركة...</option>';
+            
+            accessibleCompanies.forEach(company => {
+                const option = document.createElement('option');
+                option.value = company.id;
+                option.textContent = company.name;
+                selector.appendChild(option);
+            });
+            
+            if (accessibleCompanies.length > 0) {
+                selector.style.display = 'block';
+            }
+        }
+
+        // Switch company context
+        async function switchCompany() {
+            const selector = document.getElementById('companySelector');
+            const companyId = selector.value;
+            
+            if (!companyId) {
+                document.getElementById('currentCompany').textContent = 'لم يتم اختيار شركة';
+                currentCompanyId = null;
+                hideCompanySpecificTabs();
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/set-company-context', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ companyId: companyId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentCompanyId = companyId;
+                    const company = accessibleCompanies.find(c => c.id == companyId);
+                    document.getElementById('currentCompany').textContent = `الشركة: ${company.name}`;
+                    showCompanySpecificTabs();
+                    
+                    // Load transaction types and other company-specific data
+                    loadTransactionTypes();
+                    
+                    showMessage('تم تغيير سياق الشركة بنجاح', 'success');
+                } else {
+                    showMessage(`خطأ: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error switching company:', error);
+                showMessage('خطأ في تغيير سياق الشركة', 'error');
+            }
+        }
+
+        // Show/hide company-specific tabs based on user role and company selection
+        function showCompanySpecificTabs() {
+            if (currentCompanyId) {
+                document.getElementById('transactions-tab-btn').style.display = 'block';
+                
+                // Show admin tab only for system admins
+                if (currentUser && currentUser.role === 'system_admin') {
+                    document.getElementById('admin-tab-btn').style.display = 'block';
+                }
+            }
+        }
+
+        function hideCompanySpecificTabs() {
+            document.getElementById('transactions-tab-btn').style.display = 'none';
+            document.getElementById('admin-tab-btn').style.display = 'none';
+        }
+
+        // Transaction Functions
+        async function loadTransactionTypes() {
+            try {
+                const response = await fetch('/api/transactions/types');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const select = document.getElementById('transactionType');
+                    select.innerHTML = '<option value="">-- اختر نوع المعاملة --</option>';
+                    
+                    result.transaction_types.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type.value;
+                        option.textContent = type.label;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading transaction types:', error);
+            }
+        }
+
+        // Submit transaction form
+        document.getElementById('transactionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentCompanyId) {
+                showMessage('يجب اختيار شركة أولاً', 'error', 'transaction-message');
+                return;
+            }
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري الحفظ...';
+            
+            try {
+                const formData = new FormData(this);
+                const transactionData = {
+                    company_id: currentCompanyId,
+                    transaction_type: formData.get('transaction_type'),
+                    amount: formData.get('amount'),
+                    description: formData.get('description'),
+                    transaction_date: formData.get('transaction_date'),
+                    reference_number: formData.get('reference_number')
+                };
+                
+                const response = await fetch('/api/transactions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transactionData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(`تم حفظ المعاملة بنجاح! الرقم الإلكتروني: ${result.transaction.electronic_number}`, 'success', 'transaction-message');
+                    this.reset();
+                    loadTransactions();
+                } else {
+                    showMessage(`خطأ: ${result.message}`, 'error', 'transaction-message');
+                }
+            } catch (error) {
+                console.error('Error creating transaction:', error);
+                showMessage('خطأ في إنشاء المعاملة', 'error', 'transaction-message');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Load transactions for current company
+        async function loadTransactions() {
+            if (!currentCompanyId) return;
+            
+            try {
+                const response = await fetch(`/api/transactions?company_id=${currentCompanyId}`);
+                const result = await response.json();
+                
+                const listDiv = document.getElementById('transactionsList');
+                
+                if (result.success && result.transactions.length > 0) {
+                    listDiv.innerHTML = result.transactions.map(transaction => `
+                        <div class="transaction-item">
+                            <div class="electronic-number">${transaction.electronic_number}</div>
+                            <div><strong>النوع:</strong> ${transaction.transaction_type}</div>
+                            <div><strong>المبلغ:</strong> ${parseFloat(transaction.amount).toLocaleString()} ريال</div>
+                            <div><strong>الوصف:</strong> ${transaction.description}</div>
+                            <div><strong>التاريخ:</strong> ${new Date(transaction.transaction_date).toLocaleDateString('ar-SA')}</div>
+                            ${transaction.reference_number ? `<div><strong>الرقم المرجعي:</strong> ${transaction.reference_number}</div>` : ''}
+                            <div><strong>أنشأه:</strong> ${transaction.created_by_name || 'غير محدد'}</div>
+                            <div><strong>تاريخ الإنشاء:</strong> ${new Date(transaction.created_at).toLocaleString('ar-SA')}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    listDiv.innerHTML = '<div class="loading">لا توجد معاملات مالية</div>';
+                }
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                document.getElementById('transactionsList').innerHTML = '<div class="loading">خطأ في تحميل المعاملات</div>';
+            }
+        }
+
+        // Admin Functions
+        async function loadCompaniesManagement() {
+            if (!currentUser || currentUser.role !== 'system_admin') return;
+            
+            try {
+                const response = await fetch('/api/admin/companies');
+                const result = await response.json();
+                
+                const listDiv = document.getElementById('companiesManagement');
+                
+                if (result.success && result.companies.length > 0) {
+                    listDiv.innerHTML = result.companies.map(company => `
+                        <div class="company-item">
+                            <div class="company-name">${company.name}</div>
+                            <div><strong>البريد الإلكتروني:</strong> ${company.email}</div>
+                            <div><strong>الخطة:</strong> ${company.subscription_plan_details.name}</div>
+                            <div><strong>الحالة:</strong> <span class="subscription-status ${company.subscription_status}">${company.subscription_status === 'active' ? 'مفعل' : 'معلق'}</span></div>
+                            <div><strong>المستخدمون:</strong> ${company.usage_stats.userCount} / ${company.max_users === -1 ? '∞' : company.max_users}</div>
+                            <div><strong>المعاملات:</strong> ${company.usage_stats.transactionCount}</div>
+                            <div class="action-buttons">
+                                <button class="btn btn-small btn-warning" onclick="suspendCompany(${company.id})">تعليق</button>
+                                <button class="btn btn-small btn-success" onclick="reactivateCompany(${company.id})">تفعيل</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    listDiv.innerHTML = '<div class="loading">لا توجد شركات</div>';
+                }
+            } catch (error) {
+                console.error('Error loading companies management:', error);
+                document.getElementById('companiesManagement').innerHTML = '<div class="loading">خطأ في تحميل الشركات</div>';
+            }
+        }
+
+        async function loadActivityLogs() {
+            if (!currentUser || currentUser.role !== 'system_admin') return;
+            
+            try {
+                const response = await fetch('/api/admin/logs');
+                const result = await response.json();
+                
+                const listDiv = document.getElementById('activityLogs');
+                
+                if (result.success && result.logs.length > 0) {
+                    listDiv.innerHTML = result.logs.map(log => `
+                        <div class="log-item">
+                            <div><strong>المدير:</strong> ${log.admin_name || 'غير محدد'}</div>
+                            <div><strong>الشركة:</strong> ${log.company_name || 'النظام'}</div>
+                            <div><strong>الإجراء:</strong> ${log.action_type}</div>
+                            <div><strong>الوصف:</strong> ${log.description}</div>
+                            <div><strong>التاريخ:</strong> ${new Date(log.created_at).toLocaleString('ar-SA')}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    listDiv.innerHTML = '<div class="loading">لا توجد سجلات</div>';
+                }
+            } catch (error) {
+                console.error('Error loading activity logs:', error);
+                document.getElementById('activityLogs').innerHTML = '<div class="loading">خطأ في تحميل السجلات</div>';
+            }
+        }
+
+        // Suspend company
+        async function suspendCompany(companyId) {
+            const reason = prompt('أدخل سبب التعليق:');
+            if (!reason) return;
+            
+            try {
+                const response = await fetch(`/api/admin/companies/${companyId}/suspend`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('تم تعليق الشركة بنجاح', 'success', 'admin-message');
+                    loadCompaniesManagement();
+                } else {
+                    showMessage(`خطأ: ${result.message}`, 'error', 'admin-message');
+                }
+            } catch (error) {
+                console.error('Error suspending company:', error);
+                showMessage('خطأ في تعليق الشركة', 'error', 'admin-message');
+            }
+        }
+
+        // Reactivate company
+        async function reactivateCompany(companyId) {
+            const plan = prompt('أدخل خطة الاشتراك (basic, standard, premium, enterprise):');
+            if (!plan) return;
+            
+            const duration = prompt('أدخل مدة الاشتراك بالأشهر:');
+            if (!duration) return;
+            
+            try {
+                const response = await fetch(`/api/admin/companies/${companyId}/reactivate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        subscription_plan: plan, 
+                        duration_months: parseInt(duration) 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('تم إعادة تفعيل الشركة بنجاح', 'success', 'admin-message');
+                    loadCompaniesManagement();
+                } else {
+                    showMessage(`خطأ: ${result.message}`, 'error', 'admin-message');
+                }
+            } catch (error) {
+                console.error('Error reactivating company:', error);
+                showMessage('خطأ في إعادة تفعيل الشركة', 'error', 'admin-message');
+            }
+        }
+
+        // Enhanced authentication functions
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/auth/me');
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentUser = result.user;
+                    document.getElementById('userEmail').textContent = result.user.email;
+                    document.getElementById('userInfo').style.display = 'block';
+                    
+                    // Load accessible companies
+                    await loadAccessibleCompanies();
+                    
+                    // Auto-select primary company if available
+                    if (result.user.company_id && accessibleCompanies.some(c => c.id == result.user.company_id)) {
+                        document.getElementById('companySelector').value = result.user.company_id;
+                        await switchCompany();
+                    }
+                } else {
+                    currentUser = null;
+                    document.getElementById('userInfo').style.display = 'none';
+                    hideCompanySpecificTabs();
+                }
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+            }
+        }
+
+        // Initialize multi-tenant features when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as default for transaction date
+            const today = new Date().toISOString().split('T')[0];
+            const transactionDateInput = document.getElementById('transactionDate');
+            if (transactionDateInput) {
+                transactionDateInput.value = today;
+            }
+            
+            // Check authentication status
+            checkAuthStatus();
+        });
     </script>
 </body>
 </html>
