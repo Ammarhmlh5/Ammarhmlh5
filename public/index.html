@@ -540,6 +540,7 @@
                 <button class="tab-button" onclick="showTab('company-tab')">تسجيل شركة جديدة</button>
                 <button class="tab-button" onclick="showTab('login-tab')">تسجيل الدخول</button>
                 <button class="tab-button" onclick="showTab('password-tab')">إدارة كلمة المرور</button>
+                <button class="tab-button" id="subscribers-tab-btn" onclick="showTab('subscribers-tab')" style="display: none;">إدارة المشتركين</button>
                 <button class="tab-button" id="transactions-tab-btn" onclick="showTab('transactions-tab')" style="display: none;">المعاملات المالية</button>
                 <button class="tab-button" id="admin-tab-btn" onclick="showTab('admin-tab')" style="display: none;">لوحة المدير</button>
             </div>
@@ -832,6 +833,150 @@
                             <div class="loading">جاري تحميل المعاملات...</div>
                         </div>
                         <button class="btn refresh-btn" onclick="loadTransactions()">تحديث القائمة</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Subscribers Management Tab -->
+            <div id="subscribers-tab" class="tab-content">
+                <div class="auth-section">
+                    <h2>إدارة المشتركين</h2>
+                    
+                    <div id="subscribers-message"></div>
+                    
+                    <!-- Add New Subscriber Form -->
+                    <div class="form-section">
+                        <h3>إضافة مشترك جديد</h3>
+                        
+                        <form id="subscriberForm">
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="subscriberName">الاسم الكامل *</label>
+                                        <input type="text" id="subscriberName" name="full_name" required placeholder="أدخل اسم المشترك الكامل">
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="subscriberPhone">رقم الهاتف *</label>
+                                        <input type="tel" id="subscriberPhone" name="phone" required placeholder="أدخل رقم الهاتف">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="subscriberAddress">العنوان *</label>
+                                <textarea id="subscriberAddress" name="address" required placeholder="أدخل عنوان المشترك" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="businessType">نوع النشاط</label>
+                                        <select id="businessType" name="business_type">
+                                            <option value="">اختر نوع النشاط...</option>
+                                            <option value="سكني">سكني</option>
+                                            <option value="تجاري">تجاري</option>
+                                            <option value="صناعي">صناعي</option>
+                                            <option value="زراعي">زراعي</option>
+                                            <option value="خدمي">خدمي</option>
+                                            <option value="حكومي">حكومي</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="meterSystemType">نوع نظام العداد</label>
+                                        <select id="meterSystemType" name="meter_system_type">
+                                            <option value="">اختر نوع العداد...</option>
+                                            <option value="أحادي الطور">أحادي الطور</option>
+                                            <option value="ثلاثي الطور">ثلاثي الطور</option>
+                                            <option value="ذكي">ذكي</option>
+                                            <option value="رقمي">رقمي</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="tariffType">نوع التعرفة</label>
+                                        <select id="tariffType" name="tariff_type">
+                                            <option value="">اختر نوع التعرفة...</option>
+                                            <option value="الفئة الأولى">الفئة الأولى (0-100 ك.و.س)</option>
+                                            <option value="الفئة الثانية">الفئة الثانية (101-300 ك.و.س)</option>
+                                            <option value="الفئة الثالثة">الفئة الثالثة (301-500 ك.و.س)</option>
+                                            <option value="الفئة الرابعة">الفئة الرابعة (أكثر من 500 ك.و.س)</option>
+                                            <option value="تجاري">تجاري</option>
+                                            <option value="صناعي">صناعي</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="tariffGroup">مجموعة التعرفة</label>
+                                        <select id="tariffGroup" name="tariff_group">
+                                            <option value="">اختر مجموعة التعرفة...</option>
+                                            <option value="مجموعة أ">مجموعة أ</option>
+                                            <option value="مجموعة ب">مجموعة ب</option>
+                                            <option value="مجموعة ج">مجموعة ج</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="idCardNumber">رقم البطاقة الشخصية</label>
+                                        <input type="text" id="idCardNumber" name="id_card_number" placeholder="أدخل رقم البطاقة الشخصية">
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="propertyOwnership">ملكية العقار *</label>
+                                        <select id="propertyOwnership" name="property_ownership" required>
+                                            <option value="">اختر نوع الملكية...</option>
+                                            <option value="ملك">ملك</option>
+                                            <option value="إيجار">إيجار</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="connectionAmount">مبلغ ربط التيار (دينار)</label>
+                                        <input type="number" id="connectionAmount" name="connection_amount" step="0.01" min="0" placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="subscriberPhoto">صورة المشترك</label>
+                                        <input type="file" id="subscriberPhoto" name="photo" accept="image/*" onchange="handlePhotoUpload(this)">
+                                        <small style="color: #666; font-size: 0.8rem;">يمكن التقاط الصورة بالكاميرا أو اختيارها من الهاتف</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn" id="submitSubscriberBtn">
+                                حفظ المشترك
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Subscribers List -->
+                    <div class="subscribers-list">
+                        <h3>قائمة المشتركين</h3>
+                        <div class="search-section">
+                            <input type="text" id="subscriberSearch" placeholder="البحث برقم الحساب أو الاسم..." onchange="searchSubscribers()">
+                            <button class="btn refresh-btn" onclick="loadSubscribers()">تحديث القائمة</button>
+                        </div>
+                        <div id="subscribersList">
+                            <div class="loading">جاري تحميل المشتركين...</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1491,6 +1636,7 @@
                     
                     // Load transaction types and other company-specific data
                     loadTransactionTypes();
+                    loadSubscribers();
                     
                     showMessage('تم تغيير سياق الشركة بنجاح', 'success');
                 } else {
@@ -1505,6 +1651,7 @@
         // Show/hide company-specific tabs based on user role and company selection
         function showCompanySpecificTabs() {
             if (currentCompanyId) {
+                document.getElementById('subscribers-tab-btn').style.display = 'block';
                 document.getElementById('transactions-tab-btn').style.display = 'block';
                 
                 // Show admin tab only for system admins
@@ -1515,6 +1662,7 @@
         }
 
         function hideCompanySpecificTabs() {
+            document.getElementById('subscribers-tab-btn').style.display = 'none';
             document.getElementById('transactions-tab-btn').style.display = 'none';
             document.getElementById('admin-tab-btn').style.display = 'none';
         }
@@ -1619,6 +1767,203 @@
             } catch (error) {
                 console.error('Error loading transactions:', error);
                 document.getElementById('transactionsList').innerHTML = '<div class="loading">خطأ في تحميل المعاملات</div>';
+            }
+        }
+
+        // Subscriber Functions
+        
+        // Submit subscriber form handler
+        document.getElementById('subscriberForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentCompanyId) {
+                showMessage('يجب اختيار شركة أولاً', 'error', 'subscribers-message');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitSubscriberBtn');
+            const originalText = submitBtn.textContent;
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري الحفظ...';
+            
+            try {
+                const formData = new FormData(this);
+                const subscriberData = {
+                    full_name: formData.get('full_name').trim(),
+                    address: formData.get('address').trim(),
+                    phone: formData.get('phone').trim(),
+                    business_type: formData.get('business_type'),
+                    meter_system_type: formData.get('meter_system_type'),
+                    tariff_type: formData.get('tariff_type'),
+                    tariff_group: formData.get('tariff_group'),
+                    id_card_number: formData.get('id_card_number') ? formData.get('id_card_number').trim() : null,
+                    property_ownership: formData.get('property_ownership'),
+                    connection_amount: formData.get('connection_amount') ? parseFloat(formData.get('connection_amount')) : 0,
+                    photo_path: document.getElementById('subscriberPhoto').dataset.path || null
+                };
+                
+                console.log('إرسال بيانات المشترك:', subscriberData);
+                
+                const response = await fetch('/api/subscribers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(subscriberData)
+                });
+                
+                const result = await response.json();
+                console.log('نتيجة إضافة المشترك:', result);
+                
+                if (result.success) {
+                    showMessage(`تم إضافة المشترك بنجاح برقم الحساب: ${result.subscriber.account_number}`, 'success', 'subscribers-message');
+                    this.reset();
+                    document.getElementById('subscriberPhoto').dataset.path = '';
+                    loadSubscribers();
+                } else {
+                    showMessage(result.message || 'فشل في إضافة المشترك', 'error', 'subscribers-message');
+                }
+            } catch (error) {
+                console.error('Error creating subscriber:', error);
+                showMessage('خطأ في إضافة المشترك', 'error', 'subscribers-message');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Load subscribers for current company
+        async function loadSubscribers() {
+            if (!currentCompanyId) return;
+            
+            try {
+                const response = await fetch(`/api/subscribers?company_id=${currentCompanyId}`);
+                const result = await response.json();
+                
+                const listDiv = document.getElementById('subscribersList');
+                
+                if (result.success && result.subscribers.length > 0) {
+                    listDiv.innerHTML = result.subscribers.map(subscriber => `
+                        <div class="subscriber-item" style="border: 1px solid #e0e0e0; padding: 15px; margin: 10px 0; border-radius: 8px; background: #f9f9f9;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <div><strong>رقم الحساب:</strong> <span style="color: #667eea; font-weight: bold;">${subscriber.account_number}</span></div>
+                                <div><strong>الاسم:</strong> ${subscriber.full_name}</div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div><strong>الهاتف:</strong> ${subscriber.phone}</div>
+                                <div><strong>نوع النشاط:</strong> ${subscriber.business_type || 'غير محدد'}</div>
+                                <div><strong>ملكية العقار:</strong> ${subscriber.property_ownership || 'غير محدد'}</div>
+                                <div><strong>مبلغ الربط:</strong> ${parseFloat(subscriber.connection_amount || 0).toLocaleString()} دينار</div>
+                            </div>
+                            <div style="margin-bottom: 10px;"><strong>العنوان:</strong> ${subscriber.address}</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #666;">
+                                <div><strong>أنشأه:</strong> ${subscriber.created_by_name || 'غير محدد'}</div>
+                                <div><strong>تاريخ الإضافة:</strong> ${new Date(subscriber.created_at).toLocaleDateString('ar-SA')}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    listDiv.innerHTML = '<div class="loading">لا يوجد مشتركون</div>';
+                }
+            } catch (error) {
+                console.error('Error loading subscribers:', error);
+                document.getElementById('subscribersList').innerHTML = '<div class="loading">خطأ في تحميل المشتركين</div>';
+            }
+        }
+
+        // Search subscribers
+        async function searchSubscribers() {
+            const searchTerm = document.getElementById('subscriberSearch').value.trim();
+            if (!searchTerm) {
+                loadSubscribers();
+                return;
+            }
+            
+            if (!currentCompanyId) return;
+            
+            try {
+                // First try to search by account number
+                const accountResponse = await fetch(`/api/subscribers/account/${encodeURIComponent(searchTerm)}`);
+                if (accountResponse.ok) {
+                    const result = await accountResponse.json();
+                    if (result.success) {
+                        const listDiv = document.getElementById('subscribersList');
+                        listDiv.innerHTML = `
+                            <div class="subscriber-item" style="border: 1px solid #e0e0e0; padding: 15px; margin: 10px 0; border-radius: 8px; background: #f9f9f9;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <div><strong>رقم الحساب:</strong> <span style="color: #667eea; font-weight: bold;">${result.subscriber.account_number}</span></div>
+                                    <div><strong>الاسم:</strong> ${result.subscriber.full_name}</div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                    <div><strong>الهاتف:</strong> ${result.subscriber.phone}</div>
+                                    <div><strong>نوع النشاط:</strong> ${result.subscriber.business_type || 'غير محدد'}</div>
+                                    <div><strong>ملكية العقار:</strong> ${result.subscriber.property_ownership || 'غير محدد'}</div>
+                                    <div><strong>مبلغ الربط:</strong> ${parseFloat(result.subscriber.connection_amount || 0).toLocaleString()} دينار</div>
+                                </div>
+                                <div style="margin-bottom: 10px;"><strong>العنوان:</strong> ${result.subscriber.address}</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #666;">
+                                    <div><strong>أنشأه:</strong> ${result.subscriber.created_by_name || 'غير محدد'}</div>
+                                    <div><strong>تاريخ الإضافة:</strong> ${new Date(result.subscriber.created_at).toLocaleDateString('ar-SA')}</div>
+                                </div>
+                            </div>
+                        `;
+                        return;
+                    }
+                }
+                
+                // If account number search fails, show not found
+                document.getElementById('subscribersList').innerHTML = '<div class="loading">لا توجد نتائج للبحث</div>';
+                
+            } catch (error) {
+                console.error('Error searching subscribers:', error);
+                document.getElementById('subscribersList').innerHTML = '<div class="loading">خطأ في البحث</div>';
+            }
+        }
+
+        // Handle photo upload
+        function handlePhotoUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showMessage('يجب اختيار ملف صورة صالح', 'error', 'subscribers-message');
+                    input.value = '';
+                    return;
+                }
+                
+                // Validate file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    showMessage('حجم الصورة يجب أن يكون أقل من 5 ميجابايت', 'error', 'subscribers-message');
+                    input.value = '';
+                    return;
+                }
+                
+                // Store the file path (in a real implementation, you'd upload to server)
+                input.dataset.path = `uploads/photos/${Date.now()}_${file.name}`;
+                
+                showMessage('تم اختيار الصورة بنجاح', 'success', 'subscribers-message');
+            }
+        }
+
+        // Update UI to show/hide company-specific tabs including subscribers
+        function updateCompanySpecificTabs() {
+            const subscribersTab = document.getElementById('subscribers-tab-btn');
+            const transactionsTab = document.getElementById('transactions-tab-btn');
+            const adminTab = document.getElementById('admin-tab-btn');
+            
+            if (currentUser && currentCompanyId) {
+                subscribersTab.style.display = 'inline-block';
+                transactionsTab.style.display = 'inline-block';
+                if (currentUser.role === 'system_admin') {
+                    adminTab.style.display = 'inline-block';
+                }
+            } else {
+                subscribersTab.style.display = 'none';
+                transactionsTab.style.display = 'none';
+                adminTab.style.display = 'none';
             }
         }
 
