@@ -9,6 +9,7 @@ const AuthService = require('./authService');
 const TransactionService = require('./transactionService');
 const AdminService = require('./adminService');
 const SubscriberService = require('./subscriberService');
+const NotificationService = require('./notificationService');
 const CompanyMiddleware = require('./companyMiddleware');
 
 const app = express();
@@ -21,6 +22,7 @@ const authService = new AuthService();
 const transactionService = new TransactionService();
 const adminService = new AdminService();
 const subscriberService = new SubscriberService();
+const notificationService = new NotificationService();
 const companyMiddleware = new CompanyMiddleware();
 
 // Middleware
@@ -765,6 +767,180 @@ app.get('/api/subscribers/users-for-payment',
   }
 );
 
+// Notification API Endpoints
+
+// Get notification settings by company
+app.get('/api/notifications/settings',
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const companyId = req.session.current_company_id;
+      const settings = await notificationService.database.getNotificationSettingsByCompany(companyId);
+      
+      res.json({
+        success: true,
+        message: 'تم جلب إعدادات الإشعارات بنجاح',
+        settings: settings
+      });
+    } catch (error) {
+      console.error('خطأ في API جلب إعدادات الإشعارات:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم'
+      });
+    }
+  }
+);
+
+// Initialize default notification settings
+app.post('/api/notifications/initialize',
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const companyId = req.session.current_company_id;
+      const userId = req.session.user_id;
+      
+      const result = await notificationService.initializeDefaultSettings(companyId, userId);
+      res.json(result);
+    } catch (error) {
+      console.error('خطأ في API تهيئة إعدادات الإشعارات:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم'
+      });
+    }
+  }
+);
+
+// Save notification settings
+app.post('/api/notifications/settings',
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const companyId = req.session.current_company_id;
+      const userId = req.session.user_id;
+      
+      const settingsData = {
+        ...req.body,
+        company_id: companyId,
+        created_by: userId
+      };
+      
+      const result = await notificationService.database.saveNotificationSettings(settingsData);
+      
+      res.json({
+        success: true,
+        message: 'تم حفظ إعدادات الإشعارات بنجاح',
+        settingId: result
+      });
+    } catch (error) {
+      console.error('خطأ في API حفظ إعدادات الإشعارات:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم'
+      });
+    }
+  }
+);
+
+// Get message templates
+app.get('/api/notifications/templates',
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const companyId = req.session.current_company_id;
+      const { transaction_type, channel } = req.query;
+      
+      const templates = await notificationService.database.getMessageTemplates(
+        companyId, 
+        transaction_type, 
+        channel
+      );
+      
+      res.json({
+        success: true,
+        message: 'تم جلب قوالب الرسائل بنجاح',
+        templates: templates
+      });
+    } catch (error) {
+      console.error('خطأ في API جلب قوالب الرسائل:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم'
+      });
+    }
+  }
+);
+
+// Save message template
+app.post('/api/notifications/templates',
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const companyId = req.session.current_company_id;
+      const userId = req.session.user_id;
+      
+      const templateData = {
+        ...req.body,
+        company_id: companyId,
+        created_by: userId,
+        is_default: false,
+        is_active: true
+      };
+      
+      const result = await notificationService.database.saveMessageTemplate(templateData);
+      
+      res.json({
+        success: true,
+        message: 'تم حفظ القالب بنجاح',
+        templateId: result
+      });
+    } catch (error) {
+      console.error('خطأ في API حفظ قالب الرسالة:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم'
+      });
+    }
+  }
+);
+
+// Get notification logs
+app.get('/api/notifications/logs',
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const companyId = req.session.current_company_id;
+      const { page = 1, limit = 50 } = req.query;
+      const offset = (page - 1) * limit;
+      
+      const logs = await notificationService.database.getNotificationLogsByCompany(
+        companyId, 
+        parseInt(limit), 
+        offset
+      );
+      
+      res.json({
+        success: true,
+        message: 'تم جلب سجلات الإشعارات بنجاح',
+        logs: logs
+      });
+    } catch (error) {
+      console.error('خطأ في API جلب سجلات الإشعارات:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم'
+      });
+    }
+  }
+);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('خطأ غير متوقع:', err.stack);
@@ -792,6 +968,7 @@ async function startServer() {
     await transactionService.init();
     await adminService.init();
     await subscriberService.init();
+    await notificationService.init();
     await companyMiddleware.init();
     
     // Start the server
