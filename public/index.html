@@ -1608,12 +1608,12 @@
                 if (result.success && result.users.length > 0) {
                     usersListDiv.innerHTML = result.users.map(user => `
                         <div class="user-card">
-                            <h3>${user.name} ${user.role === 'admin' ? '(مدير)' : ''}</h3>
+                            <h3>${user.name} ${user.role === 'admin' ? '(مدير)' : user.role === 'system_admin' ? '(مدير النظام)' : ''}</h3>
                             <div class="user-info">
                                 <p><strong>البريد الإلكتروني:</strong> ${user.email}</p>
                                 ${user.phone ? `<p><strong>الهاتف:</strong> ${user.phone}</p>` : ''}
                                 ${user.company_name ? `<p><strong>الشركة:</strong> ${user.company_name}</p>` : ''}
-                                <p><strong>الدور:</strong> ${user.role === 'admin' ? 'مدير' : 'مستخدم'}</p>
+                                <p><strong>الدور:</strong> ${user.role === 'admin' ? 'مدير' : user.role === 'system_admin' ? 'مدير النظام' : 'مستخدم'}</p>
                                 <p><strong>الحالة:</strong> ${user.is_active ? 'مفعل' : 'غير مفعل'}</p>
                                 <p><strong>تاريخ الإنشاء:</strong> ${new Date(user.created_at).toLocaleString('ar-SA')}</p>
                                 <p><strong>المعرف:</strong> ${user.id}</p>
