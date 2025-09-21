@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المستخدمين</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .form-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            direction: rtl;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .users-section {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .users-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .user-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-right: 4px solid #667eea;
+        }
+        
+        .user-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .user-info {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+        
+        .refresh-btn {
+            background: #28a745;
+            margin-bottom: 20px;
+            width: auto;
+            display: inline-block;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>نظام إدارة المستخدمين</h1>
+            <p>إنشاء وإدارة المستخدمين مع حفظ آمن في قاعدة البيانات</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- User Creation Form -->
+            <div class="form-section">
+                <h2>إضافة مستخدم جديد</h2>
+                
+                <div id="message"></div>
+                
+                <form id="userForm">
+                    <div class="form-group">
+                        <label for="name">الاسم الكامل *</label>
+                        <input type="text" id="name" name="name" required placeholder="أدخل الاسم الكامل">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">البريد الإلكتروني *</label>
+                        <input type="email" id="email" name="email" required placeholder="أدخل البريد الإلكتروني">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">رقم الهاتف</label>
+                        <input type="tel" id="phone" name="phone" placeholder="أدخل رقم الهاتف (اختياري)">
+                    </div>
+                    
+                    <button type="submit" class="btn" id="submitBtn">
+                        حفظ المستخدم
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Users List -->
+            <div class="users-section">
+                <h2>المستخدمون المحفوظون</h2>
+                <button class="btn refresh-btn" onclick="loadUsers()">تحديث القائمة</button>
+                <div id="usersList">
+                    <div class="loading">جاري تحميل المستخدمين...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show message to user
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Submit form handler
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري الحفظ...';
+            
+            try {
+                const formData = new FormData(this);
+                const userData = {
+                    name: formData.get('name').trim(),
+                    email: formData.get('email').trim(),
+                    phone: formData.get('phone').trim()
+                };
+                
+                console.log('إرسال بيانات المستخدم:', userData);
+                
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                const result = await response.json();
+                console.log('استجابة الخادم:', result);
+                
+                if (result.success) {
+                    showMessage(`تم حفظ المستخدم بنجاح! المعرف: ${result.user.id}`, 'success');
+                    this.reset(); // Clear form
+                    loadUsers(); // Refresh users list
+                } else {
+                    showMessage(`خطأ: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('خطأ في الطلب:', error);
+                showMessage('خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.', 'error');
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Load and display users
+        async function loadUsers() {
+            const usersListDiv = document.getElementById('usersList');
+            usersListDiv.innerHTML = '<div class="loading">جاري تحميل المستخدمين...</div>';
+            
+            try {
+                const response = await fetch('/api/users');
+                const result = await response.json();
+                
+                if (result.success && result.users.length > 0) {
+                    usersListDiv.innerHTML = result.users.map(user => `
+                        <div class="user-card">
+                            <h3>${user.name}</h3>
+                            <div class="user-info">
+                                <p><strong>البريد الإلكتروني:</strong> ${user.email}</p>
+                                ${user.phone ? `<p><strong>الهاتف:</strong> ${user.phone}</p>` : ''}
+                                <p><strong>تاريخ الإنشاء:</strong> ${new Date(user.created_at).toLocaleString('ar-SA')}</p>
+                                <p><strong>المعرف:</strong> ${user.id}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else if (result.success && result.users.length === 0) {
+                    usersListDiv.innerHTML = '<p>لا توجد مستخدمون محفوظون بعد.</p>';
+                } else {
+                    usersListDiv.innerHTML = '<p>خطأ في تحميل المستخدمين.</p>';
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل المستخدمين:', error);
+                usersListDiv.innerHTML = '<p>خطأ في الاتصال بالخادم.</p>';
+            }
+        }
+
+        // Load users when page loads
+        document.addEventListener('DOMContentLoaded', loadUsers);
+    </script>
+</body>
+</html>
