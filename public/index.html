@@ -303,12 +303,37 @@
         }
 
         .form-section-title {
-            color: #667eea;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            padding: 15px 20px;
+            margin: 25px 0 20px 0;
+            border-radius: 12px;
             font-weight: bold;
-            border-bottom: 2px solid #e1e5e9;
-            padding-bottom: 10px;
+            color: #495057;
+            text-align: center;
+            border-right: 5px solid #6c5ce7;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .form-section-title::before {
+            content: "📋";
+            margin-left: 10px;
+            font-size: 1.2rem;
+        }
+
+        .form-section-title.admin-section::before {
+            content: "👨‍💼";
+        }
+
+        @keyframes successPulse {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        .company-form-section {
+            transition: all 0.3s ease;
         }
 
         @media (max-width: 768px) {
@@ -435,7 +460,7 @@
                             <input type="text" id="companyDescription" name="description" placeholder="أدخل وصف مختصر للشركة">
                         </div>
 
-                        <div class="form-section-title">بيانات مدير الشركة (سيتم تفعيل حسابه تلقائياً)</div>
+                        <div class="form-section-title admin-section">بيانات مدير الشركة (سيتم تفعيل حسابه تلقائياً)</div>
 
                         <div class="form-row">
                             <div class="form-col">
@@ -712,9 +737,19 @@
                 console.log('استجابة الخادم:', result);
                 
                 if (result.success) {
-                    showMessage(`تم تسجيل الشركة بنجاح! معرف الشركة: ${result.company.id}, معرف المدير: ${result.admin.id}`, 'success', 'company-message');
+                    showMessage(`✅ تم تسجيل الشركة بنجاح! 
+                        🏢 معرف الشركة: ${result.company.id} 
+                        👨‍💼 معرف المدير: ${result.admin.id}
+                        📧 تم تفعيل حساب المدير: ${result.admin.email}`, 'success', 'company-message');
                     this.reset(); // Clear form
                     loadUsers(); // Refresh users list
+                    
+                    // Show success animation
+                    const companyTab = document.getElementById('company-tab');
+                    companyTab.style.animation = 'successPulse 0.6s ease-in-out';
+                    setTimeout(() => {
+                        companyTab.style.animation = '';
+                    }, 600);
                 } else {
                     showMessage(`خطأ: ${result.message}`, 'error', 'company-message');
                 }
@@ -1034,7 +1069,82 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadUsers();
             checkLoginStatus();
+            addFormValidation();
         });
+
+        // Add real-time form validation
+        function addFormValidation() {
+            // Company form validation
+            const companyForm = document.getElementById('companyForm');
+            const inputs = companyForm.querySelectorAll('input[required]');
+            
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateField);
+                input.addEventListener('input', clearFieldError);
+            });
+        }
+
+        function validateField(event) {
+            const field = event.target;
+            const value = field.value.trim();
+            
+            clearFieldError(event);
+            
+            if (field.hasAttribute('required') && !value) {
+                showFieldError(field, 'هذا الحقل مطلوب');
+                return false;
+            }
+            
+            if (field.type === 'email' && value) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(value)) {
+                    showFieldError(field, 'البريد الإلكتروني غير صالح');
+                    return false;
+                }
+            }
+            
+            if (field.name === 'name' || field.name === 'adminName') {
+                if (value.length < 2) {
+                    showFieldError(field, 'الاسم يجب أن يكون على الأقل حرفين');
+                    return false;
+                }
+            }
+            
+            showFieldSuccess(field);
+            return true;
+        }
+
+        function showFieldError(field, message) {
+            field.style.borderColor = '#e74c3c';
+            field.style.backgroundColor = '#fdf2f2';
+            
+            // Remove existing error message
+            const existingError = field.parentNode.querySelector('.field-error');
+            if (existingError) existingError.remove();
+            
+            // Add error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'field-error';
+            errorDiv.style.color = '#e74c3c';
+            errorDiv.style.fontSize = '0.8rem';
+            errorDiv.style.marginTop = '5px';
+            errorDiv.textContent = message;
+            field.parentNode.appendChild(errorDiv);
+        }
+
+        function showFieldSuccess(field) {
+            field.style.borderColor = '#27ae60';
+            field.style.backgroundColor = '#f8fff8';
+        }
+
+        function clearFieldError(event) {
+            const field = event.target;
+            field.style.borderColor = '#e1e5e9';
+            field.style.backgroundColor = '';
+            
+            const errorDiv = field.parentNode.querySelector('.field-error');
+            if (errorDiv) errorDiv.remove();
+        }
     </script>
 </body>
 </html>
