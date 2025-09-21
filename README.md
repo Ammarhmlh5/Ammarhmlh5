@@ -1,18 +1,22 @@
-# نظام إدارة المستخدمين
-## User Management System
+# نظام إدارة المستخدمين والشركات
+## User and Company Management System
 
-نظام شامل لإدارة المستخدمين مع حفظ آمن في قاعدة البيانات، مصمم لحل مشكلة عدم القدرة على حفظ بيانات المستخدمين الجدد.
+نظام شامل لإدارة المستخدمين والشركات مع تسجيل الشركات الجديدة وتفعيل حساب المدير تلقائياً، مصمم لحل مشكلة عدم القدرة على حفظ بيانات المستخدمين الجدد وإضافة نظام إدارة الشركات.
 
-A comprehensive user management system with secure database persistence, designed to resolve the issue of inability to save new user data.
+A comprehensive user and company management system with automatic admin user activation for new companies, designed to resolve user data persistence issues and add company management capabilities.
 
 ## المزايا الرئيسية | Key Features
 
-- ✅ **حفظ آمن للمستخدمين** - Secure user data persistence
-- ✅ **واجهة عربية سهلة الاستخدام** - User-friendly Arabic interface  
+- ✅ **تسجيل الشركات الجديدة** - New company registration with automatic admin activation
+- ✅ **إدارة المستخدمين** - Comprehensive user management with roles
+- ✅ **حفظ آمن للمستخدمين والشركات** - Secure data persistence for users and companies
+- ✅ **واجهة عربية سهلة الاستخدام** - User-friendly Arabic interface with tabs
 - ✅ **التحقق من صحة البيانات** - Data validation and error handling
-- ✅ **منع التكرار** - Duplicate email prevention
-- ✅ **API متكامل** - Complete REST API
-- ✅ **قاعدة بيانات SQLite** - SQLite database integration
+- ✅ **منع التكرار** - Duplicate email prevention for users and companies
+- ✅ **API متكامل** - Complete REST API with company endpoints
+- ✅ **قاعدة بيانات SQLite** - SQLite database with relational schema
+- ✅ **تفعيل المدير تلقائياً** - Automatic admin user activation for new companies
+- ✅ **إدارة الأدوار** - User role management (admin/user)
 
 ## التثبيت والتشغيل | Installation & Setup
 
@@ -30,8 +34,35 @@ npm start
 - **الواجهة الرئيسية | Main Interface**: http://localhost:3000
 - **API الصحة | Health API**: http://localhost:3000/api/health
 - **API المستخدمين | Users API**: http://localhost:3000/api/users
+- **API الشركات | Companies API**: http://localhost:3000/api/companies
 
 ## استخدام API | API Usage
+
+### تسجيل شركة جديدة مع تفعيل المدير | Register New Company with Admin
+```bash
+curl -X POST http://localhost:3000/api/companies/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "شركة التقنية المتطورة",
+    "email": "info@techcompany.com",
+    "phone": "0501234567",
+    "address": "الرياض، المملكة العربية السعودية",
+    "description": "شركة متخصصة في حلول التقنية",
+    "adminName": "أحمد محمد",
+    "adminEmail": "admin@techcompany.com",
+    "adminPhone": "0509876543"
+  }'
+```
+
+### جلب جميع الشركات | Get All Companies
+```bash
+curl -X GET http://localhost:3000/api/companies
+```
+
+### جلب مستخدمي شركة معينة | Get Company Users
+```bash
+curl -X GET http://localhost:3000/api/companies/1/users
+```
 
 ### إضافة مستخدم جديد | Create New User
 ```bash

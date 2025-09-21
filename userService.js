@@ -55,7 +55,10 @@ class UserService {
       const cleanData = {
         name: userData.name.trim(),
         email: userData.email.trim().toLowerCase(),
-        phone: userData.phone ? userData.phone.trim() : null
+        phone: userData.phone ? userData.phone.trim() : null,
+        company_id: userData.company_id || null,
+        role: userData.role || 'user',
+        is_active: userData.is_active !== undefined ? userData.is_active : 1
       };
 
       // Save to database

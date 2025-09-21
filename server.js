@@ -3,12 +3,14 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const UserService = require('./userService');
+const CompanyService = require('./companyService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize user service
+// Initialize services
 const userService = new UserService();
+const companyService = new CompanyService();
 
 // Middleware
 app.use(cors());
@@ -24,6 +26,81 @@ app.get('/', (req, res) => {
 });
 
 // API Routes
+
+// Register a new company with admin user
+app.post('/api/companies/register', async (req, res) => {
+  try {
+    console.log('طلب تسجيل شركة جديدة:', req.body);
+    
+    const result = await companyService.registerCompany(req.body);
+    
+    if (result.success) {
+      res.status(201).json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error('خطأ في API تسجيل الشركة:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ داخلي في الخادم',
+      company: null,
+      admin: null
+    });
+  }
+});
+
+// Get all companies
+app.get('/api/companies', async (req, res) => {
+  try {
+    const result = await companyService.getAllCompanies();
+    res.json(result);
+  } catch (error) {
+    console.error('خطأ في API جلب الشركات:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ داخلي في الخادم',
+      companies: []
+    });
+  }
+});
+
+// Get company by ID
+app.get('/api/companies/:id', async (req, res) => {
+  try {
+    const result = await companyService.getCompanyById(req.params.id);
+    
+    if (result.success) {
+      res.json(result);
+    } else if (result.message === 'الشركة غير موجودة') {
+      res.status(404).json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error('خطأ في API جلب الشركة:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ داخلي في الخادم',
+      company: null
+    });
+  }
+});
+
+// Get users by company
+app.get('/api/companies/:id/users', async (req, res) => {
+  try {
+    const result = await companyService.getUsersByCompany(req.params.id);
+    res.json(result);
+  } catch (error) {
+    console.error('خطأ في API جلب مستخدمي الشركة:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ داخلي في الخادم',
+      users: []
+    });
+  }
+});
 
 // Create a new user
 app.post('/api/users', async (req, res) => {
@@ -113,14 +190,16 @@ app.use((req, res) => {
 // Initialize the application
 async function startServer() {
   try {
-    // Initialize database and user service
+    // Initialize database and services
     await userService.init();
+    await companyService.init();
     
     // Start the server
     app.listen(PORT, () => {
       console.log(`🚀 الخادم يعمل على المنفذ ${PORT}`);
       console.log(`📝 يمكنك الوصول للتطبيق على: http://localhost:${PORT}`);
       console.log(`🔗 API endpoint: http://localhost:${PORT}/api/users`);
+      console.log(`🏢 Company API: http://localhost:${PORT}/api/companies`);
     });
   } catch (error) {
     console.error('فشل في بدء تشغيل الخادم:', error.message);
@@ -132,12 +211,14 @@ async function startServer() {
 process.on('SIGINT', () => {
   console.log('\n🛑 إغلاق الخادم...');
   userService.close();
+  companyService.close();
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
   console.log('\n🛑 إغلاق الخادم...');
   userService.close();
+  companyService.close();
   process.exit(0);
 });
 

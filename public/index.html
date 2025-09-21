@@ -175,8 +175,73 @@
             width: auto;
             display: inline-block;
         }
-        
+
+        .tab-navigation {
+            display: flex;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .company-form-section {
+            background: #f0f8ff;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px solid #667eea;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .form-section-title {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 10px;
+        }
+
         @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
             .container {
                 margin: 10px;
             }
@@ -188,43 +253,132 @@
             .main-content {
                 padding: 20px;
             }
+
+            .tab-button {
+                font-size: 0.9rem;
+                padding: 12px 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>نظام إدارة المستخدمين</h1>
-            <p>إنشاء وإدارة المستخدمين مع حفظ آمن في قاعدة البيانات</p>
+            <h1>نظام إدارة المستخدمين والشركات</h1>
+            <p>تسجيل شركات جديدة مع تفعيل حساب المدير تلقائياً وإدارة المستخدمين</p>
         </div>
         
         <div class="main-content">
-            <!-- User Creation Form -->
-            <div class="form-section">
-                <h2>إضافة مستخدم جديد</h2>
-                
-                <div id="message"></div>
-                
-                <form id="userForm">
-                    <div class="form-group">
-                        <label for="name">الاسم الكامل *</label>
-                        <input type="text" id="name" name="name" required placeholder="أدخل الاسم الكامل">
-                    </div>
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="showTab('user-tab')">إضافة مستخدم فردي</button>
+                <button class="tab-button" onclick="showTab('company-tab')">تسجيل شركة جديدة</button>
+            </div>
+
+            <!-- User Registration Tab -->
+            <div id="user-tab" class="tab-content active">
+                <!-- User Creation Form -->
+                <div class="form-section">
+                    <h2>إضافة مستخدم جديد</h2>
                     
-                    <div class="form-group">
-                        <label for="email">البريد الإلكتروني *</label>
-                        <input type="email" id="email" name="email" required placeholder="أدخل البريد الإلكتروني">
-                    </div>
+                    <div id="user-message"></div>
                     
-                    <div class="form-group">
-                        <label for="phone">رقم الهاتف</label>
-                        <input type="tel" id="phone" name="phone" placeholder="أدخل رقم الهاتف (اختياري)">
-                    </div>
+                    <form id="userForm">
+                        <div class="form-group">
+                            <label for="name">الاسم الكامل *</label>
+                            <input type="text" id="name" name="name" required placeholder="أدخل الاسم الكامل">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">البريد الإلكتروني *</label>
+                            <input type="email" id="email" name="email" required placeholder="أدخل البريد الإلكتروني">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">رقم الهاتف</label>
+                            <input type="tel" id="phone" name="phone" placeholder="أدخل رقم الهاتف (اختياري)">
+                        </div>
+                        
+                        <button type="submit" class="btn" id="submitBtn">
+                            حفظ المستخدم
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Company Registration Tab -->
+            <div id="company-tab" class="tab-content">
+                <!-- Company Registration Form -->
+                <div class="company-form-section">
+                    <h2>تسجيل شركة جديدة مع تفعيل حساب المدير</h2>
                     
-                    <button type="submit" class="btn" id="submitBtn">
-                        حفظ المستخدم
-                    </button>
-                </form>
+                    <div id="company-message"></div>
+                    
+                    <form id="companyForm">
+                        <div class="form-section-title">بيانات الشركة الرئيسية</div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="companyName">اسم الشركة *</label>
+                                    <input type="text" id="companyName" name="name" required placeholder="أدخل اسم الشركة">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="companyEmail">البريد الإلكتروني للشركة *</label>
+                                    <input type="email" id="companyEmail" name="email" required placeholder="أدخل البريد الإلكتروني للشركة">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="companyPhone">رقم هاتف الشركة</label>
+                                    <input type="tel" id="companyPhone" name="phone" placeholder="أدخل رقم هاتف الشركة">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="companyAddress">عنوان الشركة</label>
+                                    <input type="text" id="companyAddress" name="address" placeholder="أدخل عنوان الشركة">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="companyDescription">وصف الشركة</label>
+                            <input type="text" id="companyDescription" name="description" placeholder="أدخل وصف مختصر للشركة">
+                        </div>
+
+                        <div class="form-section-title">بيانات مدير الشركة (سيتم تفعيل حسابه تلقائياً)</div>
+
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="adminName">اسم المدير *</label>
+                                    <input type="text" id="adminName" name="adminName" required placeholder="أدخل اسم المدير">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="adminEmail">البريد الإلكتروني للمدير *</label>
+                                    <input type="email" id="adminEmail" name="adminEmail" required placeholder="أدخل البريد الإلكتروني للمدير">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="adminPhone">رقم هاتف المدير</label>
+                            <input type="tel" id="adminPhone" name="adminPhone" placeholder="أدخل رقم هاتف المدير">
+                        </div>
+                        
+                        <button type="submit" class="btn" id="companySubmitBtn">
+                            تسجيل الشركة وتفعيل حساب المدير
+                        </button>
+                    </form>
+                </div>
             </div>
             
             <!-- Users List -->
@@ -239,9 +393,26 @@
     </div>
 
     <script>
+        // Tab functionality
+        function showTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            
+            // Activate corresponding button
+            event.target.classList.add('active');
+        }
+
         // Show message to user
-        function showMessage(message, type = 'success') {
-            const messageDiv = document.getElementById('message');
+        function showMessage(message, type = 'success', containerId = 'user-message') {
+            const messageDiv = document.getElementById(containerId);
             messageDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
             
             // Auto hide after 5 seconds
@@ -250,7 +421,7 @@
             }, 5000);
         }
 
-        // Submit form handler
+        // Submit user form handler
         document.getElementById('userForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -283,15 +454,69 @@
                 console.log('استجابة الخادم:', result);
                 
                 if (result.success) {
-                    showMessage(`تم حفظ المستخدم بنجاح! المعرف: ${result.user.id}`, 'success');
+                    showMessage(`تم حفظ المستخدم بنجاح! المعرف: ${result.user.id}`, 'success', 'user-message');
                     this.reset(); // Clear form
                     loadUsers(); // Refresh users list
                 } else {
-                    showMessage(`خطأ: ${result.message}`, 'error');
+                    showMessage(`خطأ: ${result.message}`, 'error', 'user-message');
                 }
             } catch (error) {
                 console.error('خطأ في الطلب:', error);
-                showMessage('خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.', 'error');
+                showMessage('خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.', 'error', 'user-message');
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Submit company form handler
+        document.getElementById('companyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('companySubmitBtn');
+            const originalText = submitBtn.textContent;
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري التسجيل...';
+            
+            try {
+                const formData = new FormData(this);
+                const companyData = {
+                    name: formData.get('name').trim(),
+                    email: formData.get('email').trim(),
+                    phone: formData.get('phone').trim(),
+                    address: formData.get('address').trim(),
+                    description: formData.get('description').trim(),
+                    adminName: formData.get('adminName').trim(),
+                    adminEmail: formData.get('adminEmail').trim(),
+                    adminPhone: formData.get('adminPhone').trim()
+                };
+                
+                console.log('إرسال بيانات الشركة:', companyData);
+                
+                const response = await fetch('/api/companies/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(companyData)
+                });
+                
+                const result = await response.json();
+                console.log('استجابة الخادم:', result);
+                
+                if (result.success) {
+                    showMessage(`تم تسجيل الشركة بنجاح! معرف الشركة: ${result.company.id}, معرف المدير: ${result.admin.id}`, 'success', 'company-message');
+                    this.reset(); // Clear form
+                    loadUsers(); // Refresh users list
+                } else {
+                    showMessage(`خطأ: ${result.message}`, 'error', 'company-message');
+                }
+            } catch (error) {
+                console.error('خطأ في الطلب:', error);
+                showMessage('خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.', 'error', 'company-message');
             } finally {
                 // Re-enable button
                 submitBtn.disabled = false;
@@ -311,10 +536,13 @@
                 if (result.success && result.users.length > 0) {
                     usersListDiv.innerHTML = result.users.map(user => `
                         <div class="user-card">
-                            <h3>${user.name}</h3>
+                            <h3>${user.name} ${user.role === 'admin' ? '(مدير)' : ''}</h3>
                             <div class="user-info">
                                 <p><strong>البريد الإلكتروني:</strong> ${user.email}</p>
                                 ${user.phone ? `<p><strong>الهاتف:</strong> ${user.phone}</p>` : ''}
+                                ${user.company_name ? `<p><strong>الشركة:</strong> ${user.company_name}</p>` : ''}
+                                <p><strong>الدور:</strong> ${user.role === 'admin' ? 'مدير' : 'مستخدم'}</p>
+                                <p><strong>الحالة:</strong> ${user.is_active ? 'مفعل' : 'غير مفعل'}</p>
                                 <p><strong>تاريخ الإنشاء:</strong> ${new Date(user.created_at).toLocaleString('ar-SA')}</p>
                                 <p><strong>المعرف:</strong> ${user.id}</p>
                             </div>
