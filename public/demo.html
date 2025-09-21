@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Subscriber Form Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .form-section h4 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .highlight {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            margin: 20px 0;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            padding-right: 25px;
+            position: relative;
+        }
+        
+        .feature-list li:before {
+            content: "✅";
+            position: absolute;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔌 نموذج إضافة مشترك جديد محسن</h1>
+            <p>مع جميع المتطلبات المطلوبة في التحديث</p>
+        </div>
+
+        <div class="highlight">
+            <h3>✨ التحسينات المنجزة:</h3>
+            <ul class="feature-list">
+                <li>توليد رقم حساب مميز تلقائي (COMP{company_id}-SUB{number})</li>
+                <li>جميع الحقول المطلوبة متوفرة ومدققة</li>
+                <li>رفع الصور مع دعم الكاميرا</li>
+                <li>خيار تعيين الدفع لمستخدم آخر</li>
+                <li>القيود المحاسبية التلقائية</li>
+                <li>التحقق الشامل من البيانات</li>
+            </ul>
+        </div>
+
+        <form id="subscriberForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="subscriberName">الاسم الكامل *</label>
+                    <input type="text" id="subscriberName" name="full_name" required placeholder="أدخل اسم المشترك الكامل">
+                </div>
+                <div class="form-group">
+                    <label for="subscriberPhone">رقم الهاتف *</label>
+                    <input type="tel" id="subscriberPhone" name="phone" required placeholder="أدخل رقم الهاتف">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="subscriberAddress">العنوان *</label>
+                <textarea id="subscriberAddress" name="address" required placeholder="أدخل عنوان المشترك" rows="2"></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="businessType">نوع النشاط</label>
+                    <select id="businessType" name="business_type">
+                        <option value="">اختر نوع النشاط...</option>
+                        <option value="سكني">سكني</option>
+                        <option value="تجاري">تجاري</option>
+                        <option value="صناعي">صناعي</option>
+                        <option value="زراعي">زراعي</option>
+                        <option value="خدمي">خدمي</option>
+                        <option value="حكومي">حكومي</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="meterSystemType">نوع نظام العداد</label>
+                    <select id="meterSystemType" name="meter_system_type">
+                        <option value="">اختر نوع العداد...</option>
+                        <option value="أحادي الطور">أحادي الطور</option>
+                        <option value="ثلاثي الطور">ثلاثي الطور</option>
+                        <option value="ذكي">ذكي</option>
+                        <option value="رقمي">رقمي</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tariffType">نوع التعرفة</label>
+                    <select id="tariffType" name="tariff_type">
+                        <option value="">اختر نوع التعرفة...</option>
+                        <option value="الفئة الأولى">الفئة الأولى (0-100 ك.و.س)</option>
+                        <option value="الفئة الثانية">الفئة الثانية (101-300 ك.و.س)</option>
+                        <option value="الفئة الثالثة">الفئة الثالثة (301-500 ك.و.س)</option>
+                        <option value="الفئة الرابعة">الفئة الرابعة (أكثر من 500 ك.و.س)</option>
+                        <option value="تجاري">تجاري</option>
+                        <option value="صناعي">صناعي</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tariffGroup">مجموعة التعرفة</label>
+                    <select id="tariffGroup" name="tariff_group">
+                        <option value="">اختر مجموعة التعرفة...</option>
+                        <option value="مجموعة أ">مجموعة أ</option>
+                        <option value="مجموعة ب">مجموعة ب</option>
+                        <option value="مجموعة ج">مجموعة ج</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="idCardNumber">رقم البطاقة الشخصية</label>
+                    <input type="text" id="idCardNumber" name="id_card_number" placeholder="أدخل رقم البطاقة الشخصية">
+                </div>
+                <div class="form-group">
+                    <label for="propertyOwnership">ملكية العقار *</label>
+                    <select id="propertyOwnership" name="property_ownership" required>
+                        <option value="">اختر نوع الملكية...</option>
+                        <option value="ملك">ملك</option>
+                        <option value="إيجار">إيجار</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="connectionAmount">مبلغ ربط التيار (دينار)</label>
+                    <input type="number" id="connectionAmount" name="connection_amount" step="0.01" min="0" placeholder="0.00" onchange="togglePaymentAssignment()">
+                </div>
+                <div class="form-group">
+                    <label for="subscriberPhoto">صورة المشترك</label>
+                    <input type="file" id="subscriberPhoto" name="photo" accept="image/*">
+                    <small style="color: #666; font-size: 0.8rem;">يمكن التقاط الصورة بالكاميرا أو اختيارها من الهاتف</small>
+                </div>
+            </div>
+            
+            <!-- Payment Assignment Section (NEW FEATURE) -->
+            <div id="paymentAssignmentSection" class="form-section" style="display: none;">
+                <h4>🏦 تعيين دفع مبلغ الربط</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paymentOption">خيار الدفع *</label>
+                        <select id="paymentOption" name="payment_option" onchange="togglePaymentAssignee()">
+                            <option value="current_user">تسليم للمستخدم الحالي (مدخل البيانات)</option>
+                            <option value="assign_to_user">ترحيل إلى مستخدم آخر</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="assigneeGroup" style="display: none;">
+                        <label for="paymentAssignedTo">تعيين الدفع إلى *</label>
+                        <select id="paymentAssignedTo" name="payment_assigned_to">
+                            <option value="">اختر المستخدم...</option>
+                            <option value="1">أحمد المحاسبة (محاسب)</option>
+                            <option value="2">فاطمة الصندوق (أمين صندوق)</option>
+                            <option value="3">محمد المراجعة (مراجع)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn">
+                💾 حفظ المشترك مع القيود المحاسبية
+            </button>
+        </form>
+
+        <div class="highlight" style="margin-top: 30px;">
+            <h3>🎯 المتطلبات المنجزة:</h3>
+            <p><strong>أولاً - بيانات المشترك:</strong></p>
+            <ul class="feature-list">
+                <li>رقم حساب مميز تلقائي يجمع بين رقم الشركة والمشترك</li>
+                <li>جميع البيانات المطلوبة: الاسم، العنوان، الهاتف، نوع النشاط، إلخ</li>
+                <li>رفع الصور بالكاميرا أو الاستيراد من الجهاز</li>
+                <li>ملكية العقار (ملك/إيجار)</li>
+            </ul>
+            <p><strong>ثانياً - الجانب المحاسبي:</strong></p>
+            <ul class="feature-list">
+                <li>قيود محاسبية تلقائية عند إدخال مبلغ الربط</li>
+                <li>خيار ترحيل الدفع لمستخدم آخر</li>
+                <li>تسجيل إيرادات دخول العدادات</li>
+                <li>تسليم المبلغ لصندوق مدخل البيانات أو مستخدم محدد</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Toggle payment assignment section visibility
+        function togglePaymentAssignment() {
+            const connectionAmount = document.getElementById('connectionAmount').value;
+            const paymentSection = document.getElementById('paymentAssignmentSection');
+            
+            if (connectionAmount && parseFloat(connectionAmount) > 0) {
+                paymentSection.style.display = 'block';
+            } else {
+                paymentSection.style.display = 'none';
+            }
+        }
+
+        // Toggle payment assignee dropdown
+        function togglePaymentAssignee() {
+            const paymentOption = document.getElementById('paymentOption').value;
+            const assigneeGroup = document.getElementById('assigneeGroup');
+            
+            if (paymentOption === 'assign_to_user') {
+                assigneeGroup.style.display = 'block';
+            } else {
+                assigneeGroup.style.display = 'none';
+            }
+        }
+
+        // Demo form submission
+        document.getElementById('subscriberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const subscriberData = {};
+            for (let [key, value] of formData.entries()) {
+                subscriberData[key] = value;
+            }
+            
+            // Simulate unique account number generation
+            const accountNumber = `COMP10-SUB${String(Math.floor(Math.random() * 999) + 1).padStart(6, '0')}`;
+            
+            alert(`✅ تم إنشاء المشترك بنجاح!\n\n` +
+                  `🔢 رقم الحساب: ${accountNumber}\n` +
+                  `👤 الاسم: ${subscriberData.full_name}\n` +
+                  `💰 مبلغ الربط: ${subscriberData.connection_amount || 0} دينار\n` +
+                  `🏦 خيار الدفع: ${subscriberData.payment_option === 'assign_to_user' ? 'ترحيل لمستخدم آخر' : 'للمستخدم الحالي'}\n\n` +
+                  `📊 تم إنشاء القيود المحاسبية التلقائية!`);
+        });
+    </script>
+</body>
+</html>

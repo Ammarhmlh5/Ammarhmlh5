@@ -747,6 +747,24 @@ app.delete('/api/subscribers/:id',
   }
 );
 
+// Get users for payment assignment dropdown
+app.get('/api/subscribers/users-for-payment', 
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const result = await subscriberService.getUsersForPaymentAssignment(req.session.current_company_id);
+      res.json(result);
+    } catch (error) {
+      console.error('خطأ في API جلب المستخدمين للدفع:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم'
+      });
+    }
+  }
+);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('خطأ غير متوقع:', err.stack);

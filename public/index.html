@@ -949,7 +949,7 @@
                                 <div class="form-col">
                                     <div class="form-group">
                                         <label for="connectionAmount">مبلغ ربط التيار (دينار)</label>
-                                        <input type="number" id="connectionAmount" name="connection_amount" step="0.01" min="0" placeholder="0.00">
+                                        <input type="number" id="connectionAmount" name="connection_amount" step="0.01" min="0" placeholder="0.00" onchange="togglePaymentAssignment()">
                                     </div>
                                 </div>
                                 <div class="form-col">
@@ -957,6 +957,30 @@
                                         <label for="subscriberPhoto">صورة المشترك</label>
                                         <input type="file" id="subscriberPhoto" name="photo" accept="image/*" onchange="handlePhotoUpload(this)">
                                         <small style="color: #666; font-size: 0.8rem;">يمكن التقاط الصورة بالكاميرا أو اختيارها من الهاتف</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Assignment Section (shown only when connection amount > 0) -->
+                            <div id="paymentAssignmentSection" class="form-section" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                <h4 style="color: #495057; margin-bottom: 15px;">تعيين دفع مبلغ الربط</h4>
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="paymentOption">خيار الدفع *</label>
+                                            <select id="paymentOption" name="payment_option" onchange="togglePaymentAssignee()">
+                                                <option value="current_user">تسليم للمستخدم الحالي (مدخل البيانات)</option>
+                                                <option value="assign_to_user">ترحيل إلى مستخدم آخر</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-col">
+                                        <div class="form-group" id="assigneeGroup" style="display: none;">
+                                            <label for="paymentAssignedTo">تعيين الدفع إلى *</label>
+                                            <select id="paymentAssignedTo" name="payment_assigned_to">
+                                                <option value="">جاري تحميل المستخدمين...</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1801,7 +1825,9 @@
                     id_card_number: formData.get('id_card_number') ? formData.get('id_card_number').trim() : null,
                     property_ownership: formData.get('property_ownership'),
                     connection_amount: formData.get('connection_amount') ? parseFloat(formData.get('connection_amount')) : 0,
-                    photo_path: document.getElementById('subscriberPhoto').dataset.path || null
+                    photo_path: document.getElementById('subscriberPhoto').dataset.path || null,
+                    payment_option: formData.get('payment_option') || 'current_user',
+                    payment_assigned_to: formData.get('payment_assigned_to') || null
                 };
                 
                 console.log('إرسال بيانات المشترك:', subscriberData);
@@ -1821,6 +1847,7 @@
                     showMessage(`تم إضافة المشترك بنجاح برقم الحساب: ${result.subscriber.account_number}`, 'success', 'subscribers-message');
                     this.reset();
                     document.getElementById('subscriberPhoto').dataset.path = '';
+                    document.getElementById('paymentAssignmentSection').style.display = 'none';
                     loadSubscribers();
                 } else {
                     showMessage(result.message || 'فشل في إضافة المشترك', 'error', 'subscribers-message');
@@ -1945,6 +1972,55 @@
                 input.dataset.path = `uploads/photos/${Date.now()}_${file.name}`;
                 
                 showMessage('تم اختيار الصورة بنجاح', 'success', 'subscribers-message');
+            }
+        }
+
+        // Toggle payment assignment section visibility
+        function togglePaymentAssignment() {
+            const connectionAmount = document.getElementById('connectionAmount').value;
+            const paymentSection = document.getElementById('paymentAssignmentSection');
+            
+            if (connectionAmount && parseFloat(connectionAmount) > 0) {
+                paymentSection.style.display = 'block';
+                loadUsersForPaymentAssignment();
+            } else {
+                paymentSection.style.display = 'none';
+            }
+        }
+
+        // Toggle payment assignee dropdown
+        function togglePaymentAssignee() {
+            const paymentOption = document.getElementById('paymentOption').value;
+            const assigneeGroup = document.getElementById('assigneeGroup');
+            
+            if (paymentOption === 'assign_to_user') {
+                assigneeGroup.style.display = 'block';
+            } else {
+                assigneeGroup.style.display = 'none';
+            }
+        }
+
+        // Load users for payment assignment dropdown
+        async function loadUsersForPaymentAssignment() {
+            if (!currentCompanyId) return;
+            
+            try {
+                const response = await fetch(`/api/subscribers/users-for-payment?company_id=${currentCompanyId}`);
+                const result = await response.json();
+                
+                const dropdown = document.getElementById('paymentAssignedTo');
+                dropdown.innerHTML = '<option value="">اختر المستخدم...</option>';
+                
+                if (result.success && result.users) {
+                    result.users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = `${user.name} (${user.role})`;
+                        dropdown.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading users for payment assignment:', error);
             }
         }
 
