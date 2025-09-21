@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require('path');
+const Database = require('./database');
 const UserService = require('./userService');
 const CompanyService = require('./companyService');
 const AuthService = require('./authService');
@@ -15,7 +16,10 @@ const CompanyMiddleware = require('./companyMiddleware');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize services
+// Create a shared database instance
+const sharedDatabase = new Database();
+
+// Initialize services with shared database
 const userService = new UserService();
 const companyService = new CompanyService();
 const authService = new AuthService();
@@ -961,15 +965,26 @@ app.use((req, res) => {
 // Initialize the application
 async function startServer() {
   try {
-    // Initialize database and services
-    await userService.init();
-    await companyService.init();
-    await authService.init();
-    await transactionService.init();
-    await adminService.init();
-    await subscriberService.init();
-    await notificationService.init();
-    await companyMiddleware.init();
+    // Initialize shared database first
+    console.log('🔧 تهيئة قاعدة البيانات...');
+    await sharedDatabase.init();
+    
+    // Share the database connection with all services
+    userService.database = sharedDatabase;
+    companyService.database = sharedDatabase;
+    authService.database = sharedDatabase;
+    transactionService.database = sharedDatabase;
+    adminService.database = sharedDatabase;
+    subscriberService.database = sharedDatabase;
+    notificationService.database = sharedDatabase;
+    companyMiddleware.database = sharedDatabase;
+
+    // Initialize notification service separately for transaction service
+    console.log('🔧 تهيئة الخدمات...');
+    notificationService.database = sharedDatabase; // Share database with notification service
+    transactionService.notificationService = notificationService; // Share notification service
+    
+    console.log('✅ تم تهيئة جميع الخدمات بنجاح');
     
     // Start the server
     app.listen(PORT, () => {
@@ -991,25 +1006,13 @@ async function startServer() {
 // Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\n🛑 إغلاق الخادم...');
-  userService.close();
-  companyService.close();
-  authService.close();
-  transactionService.close();
-  adminService.close();
-  subscriberService.close();
-  companyMiddleware.close();
+  sharedDatabase.close();
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
   console.log('\n🛑 إغلاق الخادم...');
-  userService.close();
-  companyService.close();
-  authService.close();
-  transactionService.close();
-  adminService.close();
-  subscriberService.close();
-  companyMiddleware.close();
+  sharedDatabase.close();
   process.exit(0);
 });
 
