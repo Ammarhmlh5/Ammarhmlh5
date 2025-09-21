@@ -47,10 +47,13 @@ class Database {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
           email TEXT UNIQUE NOT NULL,
+          password TEXT,
           phone TEXT,
           company_id INTEGER,
           role TEXT DEFAULT 'user',
           is_active BOOLEAN DEFAULT 1,
+          reset_token TEXT,
+          reset_token_expires DATETIME,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (company_id) REFERENCES companies (id)
@@ -72,10 +75,71 @@ class Database {
               reject(err);
             } else {
               console.log('تم إنشاء جدول المستخدمين بنجاح');
-              resolve();
+              
+              // Run migrations to add missing columns
+              this.runMigrations()
+                .then(() => resolve())
+                .catch(reject);
             }
           });
         }
+      });
+    });
+  }
+
+  // Run database migrations
+  async runMigrations() {
+    return new Promise((resolve, reject) => {
+      // Check if password column exists
+      this.db.all("PRAGMA table_info(users)", (err, columns) => {
+        if (err) {
+          console.error('خطأ في فحص هيكل الجدول:', err.message);
+          reject(err);
+          return;
+        }
+
+        const hasPassword = columns.some(col => col.name === 'password');
+        const hasResetToken = columns.some(col => col.name === 'reset_token');
+        const hasResetTokenExpires = columns.some(col => col.name === 'reset_token_expires');
+
+        let migrations = [];
+        
+        if (!hasPassword) {
+          migrations.push("ALTER TABLE users ADD COLUMN password TEXT");
+        }
+        
+        if (!hasResetToken) {
+          migrations.push("ALTER TABLE users ADD COLUMN reset_token TEXT");
+        }
+        
+        if (!hasResetTokenExpires) {
+          migrations.push("ALTER TABLE users ADD COLUMN reset_token_expires DATETIME");
+        }
+
+        if (migrations.length === 0) {
+          console.log('جميع العمليات الترحيلية مكتملة');
+          resolve();
+          return;
+        }
+
+        console.log(`تشغيل ${migrations.length} عملية ترحيل للقاعدة...`);
+        
+        let completed = 0;
+        migrations.forEach((migration, index) => {
+          this.db.run(migration, (err) => {
+            if (err) {
+              console.error(`خطأ في الترحيل ${index + 1}:`, err.message);
+              reject(err);
+            } else {
+              console.log(`تمت العملية الترحيلية ${index + 1}: ${migration}`);
+              completed++;
+              if (completed === migrations.length) {
+                console.log('تمت جميع العمليات الترحيلية بنجاح');
+                resolve();
+              }
+            }
+          });
+        });
       });
     });
   }
@@ -248,6 +312,97 @@ class Database {
           reject(err);
         } else {
           resolve(rows);
+        }
+      });
+    });
+  }
+
+  // Get user by email for authentication
+  async getUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT users.*, companies.name as company_name 
+        FROM users 
+        LEFT JOIN companies ON users.company_id = companies.id 
+        WHERE users.email = ?
+      `;
+      
+      this.db.get(query, [email], (err, row) => {
+        if (err) {
+          console.error('خطأ في جلب المستخدم بالبريد الإلكتروني:', err.message);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+  }
+
+  // Update user password
+  async updateUserPassword(userId, hashedPassword) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+      
+      this.db.run(query, [hashedPassword, userId], function(err) {
+        if (err) {
+          console.error('خطأ في تحديث كلمة المرور:', err.message);
+          reject(err);
+        } else {
+          console.log('تم تحديث كلمة المرور بنجاح للمستخدم:', userId);
+          resolve(this.changes > 0);
+        }
+      });
+    });
+  }
+
+  // Set password reset token
+  async setResetToken(email, token, expires) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE users SET reset_token = ?, reset_token_expires = ?, updated_at = CURRENT_TIMESTAMP WHERE email = ?`;
+      
+      this.db.run(query, [token, expires, email], function(err) {
+        if (err) {
+          console.error('خطأ في تعيين رمز الاسترداد:', err.message);
+          reject(err);
+        } else {
+          console.log('تم تعيين رمز الاسترداد بنجاح للبريد:', email);
+          resolve(this.changes > 0);
+        }
+      });
+    });
+  }
+
+  // Get user by reset token
+  async getUserByResetToken(token) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT * FROM users 
+        WHERE reset_token = ? AND reset_token_expires > datetime('now')
+      `;
+      
+      this.db.get(query, [token], (err, row) => {
+        if (err) {
+          console.error('خطأ في جلب المستخدم برمز الاسترداد:', err.message);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+  }
+
+  // Clear reset token
+  async clearResetToken(userId) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE users SET reset_token = NULL, reset_token_expires = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+      
+      this.db.run(query, [userId], function(err) {
+        if (err) {
+          console.error('خطأ في مسح رمز الاسترداد:', err.message);
+          reject(err);
+        } else {
+          console.log('تم مسح رمز الاسترداد بنجاح للمستخدم:', userId);
+          resolve(this.changes > 0);
         }
       });
     });

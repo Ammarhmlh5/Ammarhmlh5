@@ -33,6 +33,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
         
         .header h1 {
@@ -43,6 +44,80 @@
         .header p {
             font-size: 1.1rem;
             opacity: 0.9;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        .auth-section {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .password-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .small-btn {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            margin: 5px;
+        }
+
+        .link-btn {
+            background: none;
+            border: none;
+            color: #667eea;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 5px;
+        }
+
+        .link-btn:hover {
+            color: #764ba2;
         }
         
         .main-content {
@@ -264,6 +339,12 @@
 <body>
     <div class="container">
         <div class="header">
+            <!-- User Info and Logout -->
+            <div id="userInfo" class="user-info" style="display: none;">
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                <span id="userEmail">البريد الإلكتروني</span>
+            </div>
+            
             <h1>نظام إدارة المستخدمين والشركات</h1>
             <p>تسجيل شركات جديدة مع تفعيل حساب المدير تلقائياً وإدارة المستخدمين</p>
         </div>
@@ -273,6 +354,8 @@
             <div class="tab-navigation">
                 <button class="tab-button active" onclick="showTab('user-tab')">إضافة مستخدم فردي</button>
                 <button class="tab-button" onclick="showTab('company-tab')">تسجيل شركة جديدة</button>
+                <button class="tab-button" onclick="showTab('login-tab')">تسجيل الدخول</button>
+                <button class="tab-button" onclick="showTab('password-tab')">إدارة كلمة المرور</button>
             </div>
 
             <!-- User Registration Tab -->
@@ -378,6 +461,127 @@
                             تسجيل الشركة وتفعيل حساب المدير
                         </button>
                     </form>
+                </div>
+            </div>
+            
+            <!-- Login Tab -->
+            <div id="login-tab" class="tab-content">
+                <div class="auth-section">
+                    <h2>تسجيل الدخول</h2>
+                    
+                    <div id="login-message"></div>
+                    
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">البريد الإلكتروني *</label>
+                            <input type="email" id="loginEmail" name="email" required placeholder="أدخل البريد الإلكتروني">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="loginPassword">كلمة المرور *</label>
+                            <input type="password" id="loginPassword" name="password" required placeholder="أدخل كلمة المرور">
+                        </div>
+                        
+                        <button type="submit" class="btn" id="loginBtn">
+                            تسجيل الدخول
+                        </button>
+                        
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button type="button" class="link-btn" onclick="showForgotPassword()">
+                                نسيت كلمة المرور؟
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Forgot Password Form -->
+                    <div id="forgotPasswordForm" style="display: none;">
+                        <h3>استرداد كلمة المرور</h3>
+                        <div id="forgot-message"></div>
+                        <form id="forgotForm">
+                            <div class="form-group">
+                                <label for="forgotEmail">البريد الإلكتروني *</label>
+                                <input type="email" id="forgotEmail" name="email" required placeholder="أدخل البريد الإلكتروني">
+                            </div>
+                            <button type="submit" class="btn small-btn">
+                                إرسال رابط الاسترداد
+                            </button>
+                            <button type="button" class="link-btn" onclick="hideForgotPassword()">
+                                العودة لتسجيل الدخول
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Reset Password Form -->
+                    <div id="resetPasswordForm" style="display: none;">
+                        <h3>إعادة تعيين كلمة المرور</h3>
+                        <div id="reset-message"></div>
+                        <form id="resetForm">
+                            <input type="hidden" id="resetToken" name="token">
+                            <div class="form-group">
+                                <label for="newPassword">كلمة المرور الجديدة *</label>
+                                <input type="password" id="newPassword" name="password" required placeholder="أدخل كلمة المرور الجديدة (6 أحرف على الأقل)" minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">تأكيد كلمة المرور *</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="أعد إدخال كلمة المرور الجديدة" minlength="6">
+                            </div>
+                            <button type="submit" class="btn small-btn">
+                                إعادة تعيين كلمة المرور
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Password Management Tab -->
+            <div id="password-tab" class="tab-content">
+                <div class="auth-section">
+                    <h2>إدارة كلمة المرور</h2>
+                    
+                    <div id="password-message"></div>
+                    
+                    <!-- Set Password Form (for users without password) -->
+                    <div id="setPasswordSection">
+                        <h3>تعيين كلمة مرور جديدة</h3>
+                        <p>اختر مستخدم لتعيين كلمة مرور له:</p>
+                        <form id="setPasswordForm">
+                            <div class="form-group">
+                                <label for="userSelect">اختر المستخدم *</label>
+                                <select id="userSelect" name="userId" required>
+                                    <option value="">-- اختر مستخدم --</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="setPassword">كلمة المرور *</label>
+                                <input type="password" id="setPassword" name="password" required placeholder="أدخل كلمة المرور (6 أحرف على الأقل)" minlength="6">
+                            </div>
+                            <button type="submit" class="btn small-btn">
+                                تعيين كلمة المرور
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Change Password Form (for logged in users) -->
+                    <div id="changePasswordSection" style="display: none;">
+                        <h3>تغيير كلمة المرور</h3>
+                        <form id="changePasswordForm">
+                            <div class="form-group">
+                                <label for="currentPassword">كلمة المرور الحالية *</label>
+                                <input type="password" id="currentPassword" name="currentPassword" required placeholder="أدخل كلمة المرور الحالية">
+                            </div>
+                            <div class="form-group">
+                                <label for="newPasswordChange">كلمة المرور الجديدة *</label>
+                                <input type="password" id="newPasswordChange" name="newPassword" required placeholder="أدخل كلمة المرور الجديدة (6 أحرف على الأقل)" minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPasswordChange">تأكيد كلمة المرور الجديدة *</label>
+                                <input type="password" id="confirmPasswordChange" name="confirmPassword" required placeholder="أعد إدخال كلمة المرور الجديدة" minlength="6">
+                            </div>
+                            <button type="submit" class="btn small-btn">
+                                تغيير كلمة المرور
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
             
@@ -559,8 +763,278 @@
             }
         }
 
-        // Load users when page loads
-        document.addEventListener('DOMContentLoaded', loadUsers);
+        // Authentication functions
+        let currentUser = null;
+
+        // Check if user is logged in
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/api/auth/me');
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentUser = result.user;
+                    updateUIForLoggedInUser();
+                } else {
+                    updateUIForLoggedOutUser();
+                }
+            } catch (error) {
+                console.error('خطأ في فحص حالة تسجيل الدخول:', error);
+                updateUIForLoggedOutUser();
+            }
+        }
+
+        // Update UI for logged in user
+        function updateUIForLoggedInUser() {
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('userEmail').textContent = currentUser.email;
+            
+            // Show change password section and hide set password section
+            document.getElementById('changePasswordSection').style.display = 'block';
+            document.getElementById('setPasswordSection').style.display = 'none';
+        }
+
+        // Update UI for logged out user
+        function updateUIForLoggedOutUser() {
+            document.getElementById('userInfo').style.display = 'none';
+            currentUser = null;
+            
+            // Hide change password section and show set password section
+            document.getElementById('changePasswordSection').style.display = 'none';
+            document.getElementById('setPasswordSection').style.display = 'block';
+            
+            // Load users for password setting dropdown
+            loadUsersForPasswordSetting();
+        }
+
+        // Load users for password setting dropdown
+        async function loadUsersForPasswordSetting() {
+            try {
+                const response = await fetch('/api/users');
+                const result = await response.json();
+                
+                const userSelect = document.getElementById('userSelect');
+                userSelect.innerHTML = '<option value="">-- اختر مستخدم --</option>';
+                
+                if (result.success && result.users.length > 0) {
+                    result.users.forEach(user => {
+                        userSelect.innerHTML += `<option value="${user.id}">${user.name} (${user.email})</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل المستخدمين:', error);
+            }
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('loginBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'جاري تسجيل الدخول...';
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData);
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(result.message, 'success', 'login-message');
+                    currentUser = result.user;
+                    updateUIForLoggedInUser();
+                    this.reset();
+                } else {
+                    showMessage(result.message, 'error', 'login-message');
+                }
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error);
+                showMessage('خطأ في الاتصال بالخادم', 'error', 'login-message');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Logout function
+        async function logout() {
+            try {
+                const response = await fetch('/api/auth/logout', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateUIForLoggedOutUser();
+                    showMessage('تم تسجيل الخروج بنجاح', 'success', 'login-message');
+                }
+            } catch (error) {
+                console.error('خطأ في تسجيل الخروج:', error);
+            }
+        }
+
+        // Show/hide forgot password form
+        function showForgotPassword() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'block';
+        }
+
+        function hideForgotPassword() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+        }
+
+        // Forgot password form handler
+        document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData);
+                
+                const response = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(result.message, 'success', 'forgot-message');
+                    
+                    // If reset token is provided (demo mode), show reset form
+                    if (result.resetToken) {
+                        showMessage('رمز الاسترداد (للتجربة فقط): ' + result.resetToken, 'info', 'forgot-message');
+                        document.getElementById('resetToken').value = result.resetToken;
+                        document.getElementById('forgotPasswordForm').style.display = 'none';
+                        document.getElementById('resetPasswordForm').style.display = 'block';
+                    }
+                } else {
+                    showMessage(result.message, 'error', 'forgot-message');
+                }
+            } catch (error) {
+                console.error('خطأ في طلب استرداد كلمة المرور:', error);
+                showMessage('خطأ في الاتصال بالخادم', 'error', 'forgot-message');
+            }
+        });
+
+        // Reset password form handler
+        document.getElementById('resetForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('كلمتا المرور غير متطابقتان', 'error', 'reset-message');
+                return;
+            }
+            
+            try {
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData);
+                
+                const response = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(result.message, 'success', 'reset-message');
+                    this.reset();
+                    // Hide reset form and show login form
+                    setTimeout(() => {
+                        document.getElementById('resetPasswordForm').style.display = 'none';
+                        document.getElementById('loginForm').style.display = 'block';
+                    }, 2000);
+                } else {
+                    showMessage(result.message, 'error', 'reset-message');
+                }
+            } catch (error) {
+                console.error('خطأ في إعادة تعيين كلمة المرور:', error);
+                showMessage('خطأ في الاتصال بالخادم', 'error', 'reset-message');
+            }
+        });
+
+        // Set password form handler
+        document.getElementById('setPasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData);
+                
+                const response = await fetch('/api/auth/set-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(result.message, 'success', 'password-message');
+                    this.reset();
+                } else {
+                    showMessage(result.message, 'error', 'password-message');
+                }
+            } catch (error) {
+                console.error('خطأ في تعيين كلمة المرور:', error);
+                showMessage('خطأ في الاتصال بالخادم', 'error', 'password-message');
+            }
+        });
+
+        // Change password form handler
+        document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPasswordChange').value;
+            const confirmPassword = document.getElementById('confirmPasswordChange').value;
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('كلمتا المرور الجديدتان غير متطابقتان', 'error', 'password-message');
+                return;
+            }
+            
+            try {
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData);
+                
+                const response = await fetch('/api/auth/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(result.message, 'success', 'password-message');
+                    this.reset();
+                } else {
+                    showMessage(result.message, 'error', 'password-message');
+                }
+            } catch (error) {
+                console.error('خطأ في تغيير كلمة المرور:', error);
+                showMessage('خطأ في الاتصال بالخادم', 'error', 'password-message');
+            }
+        });
+
+        // Load users when page loads and check login status
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+            checkLoginStatus();
+        });
     </script>
 </body>
 </html>
