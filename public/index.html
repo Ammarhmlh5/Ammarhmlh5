@@ -1844,7 +1844,11 @@
                 console.log('نتيجة إضافة المشترك:', result);
                 
                 if (result.success) {
-                    showMessage(`تم إضافة المشترك بنجاح برقم الحساب: ${result.subscriber.account_number}`, 'success', 'subscribers-message');
+                    showMessage(`✅ تم إضافة المشترك بنجاح!
+🔢 رقم الحساب: ${result.subscriber.account_number}
+👤 الاسم: ${result.subscriber.full_name}
+💰 مبلغ الربط: ${parseFloat(result.subscriber.connection_amount || 0).toLocaleString()} دينار
+${result.subscriber.connection_amount > 0 ? '📊 تم إنشاء القيود المحاسبية التلقائية!' : ''}`, 'success', 'subscribers-message');
                     this.reset();
                     document.getElementById('subscriberPhoto').dataset.path = '';
                     document.getElementById('paymentAssignmentSection').style.display = 'none';
@@ -2005,7 +2009,7 @@
             if (!currentCompanyId) return;
             
             try {
-                const response = await fetch(`/api/subscribers/users-for-payment?company_id=${currentCompanyId}`);
+                const response = await fetch(`/api/subscribers/users-for-payment`);
                 const result = await response.json();
                 
                 const dropdown = document.getElementById('paymentAssignedTo');
