@@ -1,12 +1,15 @@
 const Database = require('./database');
+const NotificationService = require('./notificationService');
 
 class TransactionService {
   constructor() {
     this.database = new Database();
+    this.notificationService = new NotificationService();
   }
 
   async init() {
     await this.database.init();
+    await this.notificationService.init();
   }
 
   // Validate transaction data
@@ -51,7 +54,7 @@ class TransactionService {
         throw new Error('خطأ في التحقق من البيانات: ' + validationErrors.join(', '));
       }
 
-      const { company_id, transaction_type, amount, description, reference_number, transaction_date } = transactionData;
+      const { company_id, transaction_type, amount, description, reference_number, transaction_date, subscriber_id } = transactionData;
 
       // Prepare transaction data
       const transactionToSave = {
@@ -66,6 +69,28 @@ class TransactionService {
 
       // Save transaction (this will automatically generate electronic number)
       const savedTransaction = await this.database.saveTransaction(transactionToSave);
+
+      // Send automatic notifications if enabled
+      try {
+        // Get company data
+        const companyData = await this.database.getCompanyById(company_id);
+        
+        // Get subscriber data if provided
+        let subscriberData = null;
+        if (subscriber_id) {
+          subscriberData = await this.database.getSubscriberById(subscriber_id, company_id);
+        }
+
+        // Send notification
+        await this.notificationService.sendTransactionNotification(
+          savedTransaction, 
+          companyData, 
+          subscriberData
+        );
+      } catch (notificationError) {
+        // Don't fail the transaction if notification fails
+        console.warn('فشل في إرسال الإشعار:', notificationError.message);
+      }
 
       return {
         success: true,
@@ -337,6 +362,7 @@ class TransactionService {
   // Close database connection
   close() {
     this.database.close();
+    this.notificationService.close();
   }
 }
 

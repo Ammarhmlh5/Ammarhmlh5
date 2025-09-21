@@ -510,6 +510,235 @@
                 padding: 12px 15px;
             }
         }
+        
+        /* Notifications Tab Styles */
+        .settings-overview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-right: 4px solid #17a2b8;
+        }
+        
+        .overview-text {
+            margin: 0;
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        
+        .notification-settings, .templates-management, .notification-logs {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .setting-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .setting-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .transaction-type-title {
+            font-weight: bold;
+            color: #495057;
+            font-size: 1.1rem;
+        }
+        
+        .setting-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-enabled {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-disabled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .setting-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .channel-badges {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .channel-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .channel-sms {
+            background: #cce5ff;
+            color: #0056b3;
+        }
+        
+        .channel-whatsapp {
+            background: #d1f2eb;
+            color: #00695c;
+        }
+        
+        .channel-email {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .variables-help {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .variables-help h5 {
+            margin: 0 0 10px 0;
+            color: #0056b3;
+        }
+        
+        .variables-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .variable {
+            background: #007bff;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+        
+        .variables-note {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .template-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .template-name {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .template-meta {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .template-content {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        
+        .log-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .log-recipient {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .log-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-sent {
+            background: #cce5ff;
+            color: #0056b3;
+        }
+        
+        .status-delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .log-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .logs-filters {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -542,6 +771,7 @@
                 <button class="tab-button" onclick="showTab('password-tab')">إدارة كلمة المرور</button>
                 <button class="tab-button" id="subscribers-tab-btn" onclick="showTab('subscribers-tab')" style="display: none;">إدارة المشتركين</button>
                 <button class="tab-button" id="transactions-tab-btn" onclick="showTab('transactions-tab')" style="display: none;">المعاملات المالية</button>
+                <button class="tab-button" id="notifications-tab-btn" onclick="showTab('notifications-tab')" style="display: none;">إعدادات الرسائل المالية</button>
                 <button class="tab-button" id="admin-tab-btn" onclick="showTab('admin-tab')" style="display: none;">لوحة المدير</button>
             </div>
 
@@ -808,6 +1038,21 @@
                             <div class="form-row">
                                 <div class="form-col">
                                     <div class="form-group">
+                                        <label for="transactionSubscriber">المشترك (للإشعارات)</label>
+                                        <select id="transactionSubscriber" name="subscriber_id">
+                                            <option value="">-- اختر مشترك (اختياري) --</option>
+                                        </select>
+                                        <small style="color: #6c757d;">اختر مشترك لإرسال إشعار تلقائي له عن هذه المعاملة</small>
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <!-- Empty column for spacing -->
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
                                         <label for="transactionDate">تاريخ المعاملة *</label>
                                         <input type="date" id="transactionDate" name="transaction_date" required>
                                     </div>
@@ -1050,6 +1295,151 @@
             </div>
         </div>
     </div>
+    
+    <!-- Financial Messaging Settings Tab -->
+    <div id="notifications-tab" class="tab-content">
+        <div class="auth-section">
+            <h2>إعدادات الرسائل المالية الموحدة</h2>
+            
+            <div id="notifications-message"></div>
+            
+            <!-- Settings Overview -->
+            <div class="settings-overview">
+                <p class="overview-text">
+                    إدارة موحدة لإعدادات الرسائل والإشعارات التلقائية للمعاملات المالية. 
+                    يمكنك تخصيص القنوات وقوالب الرسائل لكل نوع معاملة مالية.
+                </p>
+            </div>
+            
+            <!-- Notification Settings for Each Transaction Type -->
+            <div class="notification-settings">
+                <h3>إعدادات الإشعارات حسب نوع المعاملة</h3>
+                
+                <div id="notificationSettingsContainer">
+                    <div class="loading">جاري تحميل الإعدادات...</div>
+                </div>
+                
+                <button class="btn refresh-btn" onclick="loadNotificationSettings()">تحديث الإعدادات</button>
+            </div>
+            
+            <!-- Message Templates Management -->
+            <div class="templates-management">
+                <h3>إدارة قوالب الرسائل</h3>
+                
+                <!-- Template Form -->
+                <div class="template-form-section">
+                    <h4>إضافة/تعديل قالب رسالة</h4>
+                    <form id="templateForm">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="templateTransactionType">نوع المعاملة *</label>
+                                    <select id="templateTransactionType" name="transaction_type" required>
+                                        <option value="">-- اختر نوع المعاملة --</option>
+                                        <option value="sales">مبيعات</option>
+                                        <option value="purchase">مشتريات</option>
+                                        <option value="cash_receipt">إيصال نقدي</option>
+                                        <option value="journal_entry">قيد يومي</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="templateChannel">قناة الإرسال *</label>
+                                    <select id="templateChannel" name="channel" required>
+                                        <option value="">-- اختر القناة --</option>
+                                        <option value="sms">رسالة نصية (SMS)</option>
+                                        <option value="whatsapp">واتساب</option>
+                                        <option value="email">بريد إلكتروني</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="templateName">اسم القالب *</label>
+                            <input type="text" id="templateName" name="template_name" required placeholder="أدخل اسم القالب">
+                        </div>
+                        
+                        <div class="form-group" id="emailSubjectGroup" style="display: none;">
+                            <label for="templateSubject">موضوع البريد الإلكتروني</label>
+                            <input type="text" id="templateSubject" name="subject" placeholder="موضوع الرسالة">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="templateContent">محتوى الرسالة *</label>
+                            <textarea id="templateContent" name="content" required placeholder="اكتب محتوى الرسالة هنا" rows="6"></textarea>
+                        </div>
+                        
+                        <div class="variables-help">
+                            <h5>المتغيرات المتاحة:</h5>
+                            <div class="variables-list">
+                                <span class="variable">{subscriber_name}</span>
+                                <span class="variable">{account_number}</span>
+                                <span class="variable">{electronic_number}</span>
+                                <span class="variable">{amount}</span>
+                                <span class="variable">{description}</span>
+                                <span class="variable">{company_name}</span>
+                                <span class="variable">{date}</span>
+                                <span class="variable">{transaction_type}</span>
+                            </div>
+                            <p class="variables-note">يمكنك استخدام هذه المتغيرات في محتوى الرسالة وسيتم استبدالها تلقائياً بالقيم الفعلية.</p>
+                        </div>
+                        
+                        <button type="submit" class="btn">حفظ القالب</button>
+                    </form>
+                </div>
+                
+                <!-- Templates List -->
+                <div class="templates-list">
+                    <h4>قوالب الرسائل الحالية</h4>
+                    <div id="templatesList">
+                        <div class="loading">جاري تحميل القوالب...</div>
+                    </div>
+                    <button class="btn refresh-btn" onclick="loadMessageTemplates()">تحديث القوالب</button>
+                </div>
+            </div>
+            
+            <!-- Notification Logs -->
+            <div class="notification-logs">
+                <h3>سجل الإرسال وحالة التسليم</h3>
+                
+                <div class="logs-filters">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="logStatusFilter">فلتر حسب الحالة</label>
+                                <select id="logStatusFilter" onchange="filterNotificationLogs()">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="pending">قيد الانتظار</option>
+                                    <option value="sent">تم الإرسال</option>
+                                    <option value="delivered">تم التسليم</option>
+                                    <option value="failed">فشل</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="logChannelFilter">فلتر حسب القناة</label>
+                                <select id="logChannelFilter" onchange="filterNotificationLogs()">
+                                    <option value="">جميع القنوات</option>
+                                    <option value="sms">SMS</option>
+                                    <option value="whatsapp">واتساب</option>
+                                    <option value="email">بريد إلكتروني</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="notificationLogsList">
+                    <div class="loading">جاري تحميل السجلات...</div>
+                </div>
+                
+                <button class="btn refresh-btn" onclick="loadNotificationLogs()">تحديث السجلات</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Tab functionality
@@ -1067,6 +1457,19 @@
             
             // Activate corresponding button
             event.target.classList.add('active');
+            
+            // Load data for specific tabs
+            if (tabId === 'transactions-tab' && currentCompanyId) {
+                loadTransactionTypes();
+                loadSubscribersForTransaction();
+                loadTransactions();
+            } else if (tabId === 'notifications-tab' && currentCompanyId) {
+                loadNotificationSettings();
+                loadMessageTemplates();
+                loadNotificationLogs();
+            } else if (tabId === 'subscribers-tab' && currentCompanyId) {
+                loadSubscribers();
+            }
         }
 
         // Show message to user
@@ -1677,6 +2080,7 @@
             if (currentCompanyId) {
                 document.getElementById('subscribers-tab-btn').style.display = 'block';
                 document.getElementById('transactions-tab-btn').style.display = 'block';
+                document.getElementById('notifications-tab-btn').style.display = 'block';
                 
                 // Show admin tab only for system admins
                 if (currentUser && currentUser.role === 'system_admin') {
@@ -1688,6 +2092,7 @@
         function hideCompanySpecificTabs() {
             document.getElementById('subscribers-tab-btn').style.display = 'none';
             document.getElementById('transactions-tab-btn').style.display = 'none';
+            document.getElementById('notifications-tab-btn').style.display = 'none';
             document.getElementById('admin-tab-btn').style.display = 'none';
         }
 
@@ -1710,6 +2115,29 @@
                 }
             } catch (error) {
                 console.error('Error loading transaction types:', error);
+            }
+        }
+
+        async function loadSubscribersForTransaction() {
+            if (!currentCompanyId) return;
+            
+            try {
+                const response = await fetch(`/api/subscribers?company_id=${currentCompanyId}`);
+                const result = await response.json();
+                
+                const select = document.getElementById('transactionSubscriber');
+                select.innerHTML = '<option value="">-- اختر مشترك (اختياري) --</option>';
+                
+                if (result.success && result.subscribers.length > 0) {
+                    result.subscribers.forEach(subscriber => {
+                        const option = document.createElement('option');
+                        option.value = subscriber.id;
+                        option.textContent = `${subscriber.full_name} - ${subscriber.account_number}`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading subscribers for transaction:', error);
             }
         }
 
@@ -2166,6 +2594,235 @@ ${result.subscriber.connection_amount > 0 ? '📊 تم إنشاء القيود �
                 showMessage('خطأ في إعادة تفعيل الشركة', 'error', 'admin-message');
             }
         }
+
+        // Notification Functions
+        
+        // Load notification settings for current company
+        async function loadNotificationSettings() {
+            if (!currentCompanyId) return;
+            
+            try {
+                const response = await fetch(`/api/notifications/settings?company_id=${currentCompanyId}`);
+                const result = await response.json();
+                
+                const container = document.getElementById('notificationSettingsContainer');
+                
+                if (result.success && result.settings.length > 0) {
+                    container.innerHTML = result.settings.map(setting => `
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <div class="transaction-type-title">${getTransactionTypeArabic(setting.transaction_type)}</div>
+                                <div class="setting-status ${setting.is_enabled ? 'status-enabled' : 'status-disabled'}">
+                                    ${setting.is_enabled ? 'مفعل' : 'معطل'}
+                                </div>
+                            </div>
+                            <div class="setting-details">
+                                <div><strong>الإرسال التلقائي:</strong> ${setting.auto_send ? 'مفعل' : 'معطل'}</div>
+                                <div><strong>للمشترك:</strong> ${setting.send_to_subscriber ? 'نعم' : 'لا'}</div>
+                                <div><strong>للشركة:</strong> ${setting.send_to_company ? 'نعم' : 'لا'}</div>
+                                <div><strong>القنوات:</strong> 
+                                    <div class="channel-badges">
+                                        ${setting.channels.map(channel => `
+                                            <span class="channel-badge channel-${channel}">${getChannelArabic(channel)}</span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button class="btn small-btn" onclick="editNotificationSetting('${setting.transaction_type}')">تعديل الإعدادات</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="alert-info" style="text-align: center; padding: 20px;">
+                            <p>لا توجد إعدادات محفوظة. سيتم إنشاء الإعدادات الافتراضية تلقائياً.</p>
+                            <button class="btn" onclick="initializeDefaultNotificationSettings()">تهيئة الإعدادات الافتراضية</button>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                showMessage('خطأ في تحميل إعدادات الإشعارات', 'error', 'notifications-message');
+                document.getElementById('notificationSettingsContainer').innerHTML = '<div class="alert-error">خطأ في تحميل الإعدادات</div>';
+            }
+        }
+
+        // Initialize default notification settings
+        async function initializeDefaultNotificationSettings() {
+            if (!currentCompanyId) return;
+            
+            try {
+                const response = await fetch('/api/notifications/initialize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ company_id: currentCompanyId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('تم تهيئة الإعدادات الافتراضية بنجاح', 'success', 'notifications-message');
+                    loadNotificationSettings();
+                    loadMessageTemplates();
+                } else {
+                    showMessage(result.message, 'error', 'notifications-message');
+                }
+            } catch (error) {
+                showMessage('خطأ في تهيئة الإعدادات', 'error', 'notifications-message');
+            }
+        }
+
+        // Load message templates
+        async function loadMessageTemplates() {
+            if (!currentCompanyId) return;
+            
+            try {
+                const response = await fetch(`/api/notifications/templates?company_id=${currentCompanyId}`);
+                const result = await response.json();
+                
+                const container = document.getElementById('templatesList');
+                
+                if (result.success && result.templates.length > 0) {
+                    container.innerHTML = result.templates.map(template => `
+                        <div class="template-card">
+                            <div class="template-header">
+                                <div class="template-name">${template.template_name}</div>
+                                <div class="template-meta">
+                                    ${getTransactionTypeArabic(template.transaction_type)} - ${getChannelArabic(template.channel)}
+                                </div>
+                            </div>
+                            ${template.subject ? `<div><strong>الموضوع:</strong> ${template.subject}</div>` : ''}
+                            <div class="template-content">${template.content}</div>
+                            <div style="margin-top: 10px;">
+                                <button class="btn small-btn" onclick="editTemplate(${template.id})">تعديل</button>
+                                <button class="btn small-btn danger-btn" onclick="deleteTemplate(${template.id})">حذف</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="alert-info">لا توجد قوالب محفوظة</div>';
+                }
+            } catch (error) {
+                document.getElementById('templatesList').innerHTML = '<div class="alert-error">خطأ في تحميل القوالب</div>';
+            }
+        }
+
+        // Load notification logs
+        async function loadNotificationLogs() {
+            if (!currentCompanyId) return;
+            
+            try {
+                const response = await fetch(`/api/notifications/logs?company_id=${currentCompanyId}`);
+                const result = await response.json();
+                
+                const container = document.getElementById('notificationLogsList');
+                
+                if (result.success && result.logs.length > 0) {
+                    container.innerHTML = result.logs.map(log => `
+                        <div class="log-card">
+                            <div class="log-header">
+                                <div class="log-recipient">${log.recipient}</div>
+                                <div class="log-status status-${log.status}">${getStatusArabic(log.status)}</div>
+                            </div>
+                            <div class="log-details">
+                                <div><strong>القناة:</strong> ${getChannelArabic(log.channel)}</div>
+                                <div><strong>المشترك:</strong> ${log.subscriber_name || 'غير محدد'}</div>
+                                <div><strong>المعاملة:</strong> ${log.electronic_number || 'غير محدد'}</div>
+                                <div><strong>التاريخ:</strong> ${new Date(log.created_at).toLocaleString('ar-SA')}</div>
+                                ${log.sent_at ? `<div><strong>تم الإرسال:</strong> ${new Date(log.sent_at).toLocaleString('ar-SA')}</div>` : ''}
+                                ${log.error_message ? `<div style="color: #dc3545;"><strong>خطأ:</strong> ${log.error_message}</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="alert-info">لا توجد سجلات</div>';
+                }
+            } catch (error) {
+                document.getElementById('notificationLogsList').innerHTML = '<div class="alert-error">خطأ في تحميل السجلات</div>';
+            }
+        }
+
+        // Helper functions for translations
+        function getTransactionTypeArabic(type) {
+            const translations = {
+                'sales': 'مبيعات',
+                'purchase': 'مشتريات',
+                'cash_receipt': 'إيصال نقدي', 
+                'journal_entry': 'قيد يومي'
+            };
+            return translations[type] || type;
+        }
+
+        function getChannelArabic(channel) {
+            const translations = {
+                'sms': 'رسالة نصية',
+                'whatsapp': 'واتساب',
+                'email': 'بريد إلكتروني'
+            };
+            return translations[channel] || channel;
+        }
+
+        function getStatusArabic(status) {
+            const translations = {
+                'pending': 'قيد الانتظار',
+                'sent': 'تم الإرسال',
+                'delivered': 'تم التسليم',
+                'failed': 'فشل'
+            };
+            return translations[status] || status;
+        }
+
+        // Template form handling
+        document.getElementById('templateForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentCompanyId) {
+                showMessage('يجب اختيار شركة أولاً', 'error', 'notifications-message');
+                return;
+            }
+            
+            const formData = new FormData(this);
+            const templateData = {
+                company_id: currentCompanyId,
+                transaction_type: formData.get('transaction_type'),
+                channel: formData.get('channel'),
+                template_name: formData.get('template_name'),
+                subject: formData.get('subject') || '',
+                content: formData.get('content')
+            };
+            
+            try {
+                const response = await fetch('/api/notifications/templates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(templateData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('تم حفظ القالب بنجاح', 'success', 'notifications-message');
+                    this.reset();
+                    loadMessageTemplates();
+                } else {
+                    showMessage(result.message, 'error', 'notifications-message');
+                }
+            } catch (error) {
+                showMessage('خطأ في حفظ القالب', 'error', 'notifications-message');
+            }
+        });
+
+        // Show/hide email subject field based on channel selection
+        document.getElementById('templateChannel').addEventListener('change', function() {
+            const subjectGroup = document.getElementById('emailSubjectGroup');
+            if (this.value === 'email') {
+                subjectGroup.style.display = 'block';
+                document.getElementById('templateSubject').required = true;
+            } else {
+                subjectGroup.style.display = 'none';
+                document.getElementById('templateSubject').required = false;
+            }
+        });
 
         // Enhanced authentication functions
         async function checkAuthStatus() {

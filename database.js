@@ -180,6 +180,71 @@ class Database {
         )
       `;
 
+      // Create notification_settings table for financial messaging configuration
+      const createNotificationSettingsTable = `
+        CREATE TABLE IF NOT EXISTS notification_settings (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          company_id INTEGER NOT NULL,
+          transaction_type TEXT NOT NULL,
+          is_enabled BOOLEAN DEFAULT 1,
+          channels TEXT NOT NULL DEFAULT '["sms"]',
+          send_to_subscriber BOOLEAN DEFAULT 1,
+          send_to_company BOOLEAN DEFAULT 0,
+          auto_send BOOLEAN DEFAULT 1,
+          created_by INTEGER,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (company_id) REFERENCES companies (id),
+          FOREIGN KEY (created_by) REFERENCES users (id),
+          UNIQUE(company_id, transaction_type)
+        )
+      `;
+
+      // Create message_templates table for customizable templates
+      const createMessageTemplatesTable = `
+        CREATE TABLE IF NOT EXISTS message_templates (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          company_id INTEGER NOT NULL,
+          transaction_type TEXT NOT NULL,
+          channel TEXT NOT NULL CHECK(channel IN ('sms', 'whatsapp', 'email')),
+          template_name TEXT NOT NULL,
+          subject TEXT,
+          content TEXT NOT NULL,
+          variables TEXT,
+          is_default BOOLEAN DEFAULT 0,
+          is_active BOOLEAN DEFAULT 1,
+          created_by INTEGER,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (company_id) REFERENCES companies (id),
+          FOREIGN KEY (created_by) REFERENCES users (id)
+        )
+      `;
+
+      // Create notification_logs table for delivery tracking
+      const createNotificationLogsTable = `
+        CREATE TABLE IF NOT EXISTS notification_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          company_id INTEGER NOT NULL,
+          transaction_id INTEGER,
+          subscriber_id INTEGER,
+          template_id INTEGER,
+          channel TEXT NOT NULL CHECK(channel IN ('sms', 'whatsapp', 'email')),
+          recipient TEXT NOT NULL,
+          subject TEXT,
+          content TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'sent', 'delivered', 'failed', 'read')),
+          error_message TEXT,
+          sent_at DATETIME,
+          delivered_at DATETIME,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (company_id) REFERENCES companies (id),
+          FOREIGN KEY (transaction_id) REFERENCES transactions (id),
+          FOREIGN KEY (subscriber_id) REFERENCES subscribers (id),
+          FOREIGN KEY (template_id) REFERENCES message_templates (id)
+        )
+      `;
+
       // First create companies table
       this.db.run(createCompaniesTable, (err) => {
         if (err) {
@@ -244,10 +309,40 @@ class Database {
                                     } else {
                                       console.log('تم إنشاء جدول سجلات المدير بنجاح');
                                       
-                                      // Run migrations to add missing columns
-                                      this.runMigrations()
-                                        .then(() => resolve())
-                                        .catch(reject);
+                                      // Create notification settings table
+                                      this.db.run(createNotificationSettingsTable, (err) => {
+                                        if (err) {
+                                          console.error('خطأ في إنشاء جدول إعدادات الإشعارات:', err.message);
+                                          reject(err);
+                                        } else {
+                                          console.log('تم إنشاء جدول إعدادات الإشعارات بنجاح');
+                                          
+                                          // Create message templates table
+                                          this.db.run(createMessageTemplatesTable, (err) => {
+                                            if (err) {
+                                              console.error('خطأ في إنشاء جدول قوالب الرسائل:', err.message);
+                                              reject(err);
+                                            } else {
+                                              console.log('تم إنشاء جدول قوالب الرسائل بنجاح');
+                                              
+                                              // Create notification logs table
+                                              this.db.run(createNotificationLogsTable, (err) => {
+                                                if (err) {
+                                                  console.error('خطأ في إنشاء جدول سجلات الإشعارات:', err.message);
+                                                  reject(err);
+                                                } else {
+                                                  console.log('تم إنشاء جدول سجلات الإشعارات بنجاح');
+                                                  
+                                                  // Run migrations to add missing columns
+                                                  this.runMigrations()
+                                                    .then(() => resolve())
+                                                    .catch(reject);
+                                                }
+                                              });
+                                            }
+                                          });
+                                        }
+                                      });
                                     }
                                   });
                                 }
@@ -1153,6 +1248,225 @@ class Database {
       this.db.all(query, [companyId, companyId], (err, rows) => {
         if (err) {
           console.error('خطأ في جلب مستخدمي الشركة:', err.message);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  // Notification Settings Methods
+  
+  // Save notification settings for a company and transaction type
+  async saveNotificationSettings(settingsData) {
+    return new Promise((resolve, reject) => {
+      const { company_id, transaction_type, is_enabled, channels, send_to_subscriber, send_to_company, auto_send, created_by } = settingsData;
+      
+      const query = `
+        INSERT OR REPLACE INTO notification_settings 
+        (company_id, transaction_type, is_enabled, channels, send_to_subscriber, send_to_company, auto_send, created_by, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `;
+      
+      // Ensure channels is properly serialized
+      const channelsStr = Array.isArray(channels) ? JSON.stringify(channels) : JSON.stringify([channels]);
+      
+      this.db.run(query, [company_id, transaction_type, is_enabled, channelsStr, send_to_subscriber, send_to_company, auto_send, created_by], function(err) {
+        if (err) {
+          console.error('خطأ في حفظ إعدادات الإشعارات:', err.message);
+          reject(err);
+        } else {
+          console.log('تم حفظ إعدادات الإشعارات بنجاح:', this.lastID);
+          resolve(this.lastID);
+        }
+      });
+    });
+  }
+
+  // Get notification settings by company
+  async getNotificationSettingsByCompany(companyId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT ns.*, u.name as created_by_name
+        FROM notification_settings ns
+        LEFT JOIN users u ON ns.created_by = u.id
+        WHERE ns.company_id = ?
+        ORDER BY ns.transaction_type
+      `;
+      
+      this.db.all(query, [companyId], (err, rows) => {
+        if (err) {
+          console.error('خطأ في جلب إعدادات الإشعارات:', err.message);
+          reject(err);
+        } else {
+          // Parse JSON channels for each row
+          const settings = rows.map(row => {
+            try {
+              return {
+                ...row,
+                channels: JSON.parse(row.channels)
+              };
+            } catch (parseError) {
+              console.error('خطأ في تحليل قنوات الإشعار:', parseError.message, 'Raw value:', row.channels);
+              return {
+                ...row,
+                channels: ['sms'] // Default fallback
+              };
+            }
+          });
+          resolve(settings);
+        }
+      });
+    });
+  }
+
+  // Save message template
+  async saveMessageTemplate(templateData) {
+    return new Promise((resolve, reject) => {
+      const { company_id, transaction_type, channel, template_name, subject, content, variables, is_default, is_active, created_by } = templateData;
+      
+      const query = `
+        INSERT INTO message_templates 
+        (company_id, transaction_type, channel, template_name, subject, content, variables, is_default, is_active, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      
+      this.db.run(query, [company_id, transaction_type, channel, template_name, subject, content, JSON.stringify(variables), is_default, is_active, created_by], function(err) {
+        if (err) {
+          console.error('خطأ في حفظ قالب الرسالة:', err.message);
+          reject(err);
+        } else {
+          console.log('تم حفظ قالب الرسالة بنجاح:', this.lastID);
+          resolve(this.lastID);
+        }
+      });
+    });
+  }
+
+  // Get message templates by company and type
+  async getMessageTemplates(companyId, transactionType = null, channel = null) {
+    return new Promise((resolve, reject) => {
+      let query = `
+        SELECT mt.*, u.name as created_by_name
+        FROM message_templates mt
+        LEFT JOIN users u ON mt.created_by = u.id
+        WHERE mt.company_id = ? AND mt.is_active = 1
+      `;
+      const params = [companyId];
+      
+      if (transactionType) {
+        query += ` AND mt.transaction_type = ?`;
+        params.push(transactionType);
+      }
+      
+      if (channel) {
+        query += ` AND mt.channel = ?`;
+        params.push(channel);
+      }
+      
+      query += ` ORDER BY mt.transaction_type, mt.channel, mt.template_name`;
+      
+      this.db.all(query, params, (err, rows) => {
+        if (err) {
+          console.error('خطأ في جلب قوالب الرسائل:', err.message);
+          reject(err);
+        } else {
+          // Parse JSON variables for each row
+          const templates = rows.map(row => {
+            try {
+              return {
+                ...row,
+                variables: JSON.parse(row.variables || '[]')
+              };
+            } catch (parseError) {
+              console.error('خطأ في تحليل متغيرات القالب:', parseError.message);
+              return {
+                ...row,
+                variables: []
+              };
+            }
+          });
+          resolve(templates);
+        }
+      });
+    });
+  }
+
+  // Log notification
+  async logNotification(logData) {
+    return new Promise((resolve, reject) => {
+      const { company_id, transaction_id, subscriber_id, template_id, channel, recipient, subject, content, status } = logData;
+      
+      const query = `
+        INSERT INTO notification_logs 
+        (company_id, transaction_id, subscriber_id, template_id, channel, recipient, subject, content, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      
+      this.db.run(query, [company_id, transaction_id, subscriber_id, template_id, channel, recipient, subject, content, status], function(err) {
+        if (err) {
+          console.error('خطأ في تسجيل الإشعار:', err.message);
+          reject(err);
+        } else {
+          console.log('تم تسجيل الإشعار بنجاح:', this.lastID);
+          resolve(this.lastID);
+        }
+      });
+    });
+  }
+
+  // Update notification status
+  async updateNotificationStatus(logId, status, errorMessage = null, deliveredAt = null) {
+    return new Promise((resolve, reject) => {
+      let query = `
+        UPDATE notification_logs 
+        SET status = ?, error_message = ?
+      `;
+      const params = [status, errorMessage];
+      
+      if (status === 'sent') {
+        query += `, sent_at = CURRENT_TIMESTAMP`;
+      } else if (status === 'delivered' && deliveredAt) {
+        query += `, delivered_at = ?`;
+        params.push(deliveredAt);
+      }
+      
+      query += ` WHERE id = ?`;
+      params.push(logId);
+      
+      this.db.run(query, params, function(err) {
+        if (err) {
+          console.error('خطأ في تحديث حالة الإشعار:', err.message);
+          reject(err);
+        } else {
+          console.log('تم تحديث حالة الإشعار بنجاح');
+          resolve(this.changes);
+        }
+      });
+    });
+  }
+
+  // Get notification logs by company
+  async getNotificationLogsByCompany(companyId, limit = 100, offset = 0) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT nl.*, 
+               s.full_name as subscriber_name, s.account_number,
+               t.electronic_number, t.transaction_type, t.amount,
+               mt.template_name
+        FROM notification_logs nl
+        LEFT JOIN subscribers s ON nl.subscriber_id = s.id
+        LEFT JOIN transactions t ON nl.transaction_id = t.id
+        LEFT JOIN message_templates mt ON nl.template_id = mt.id
+        WHERE nl.company_id = ?
+        ORDER BY nl.created_at DESC
+        LIMIT ? OFFSET ?
+      `;
+      
+      this.db.all(query, [companyId, limit, offset], (err, rows) => {
+        if (err) {
+          console.error('خطأ في جلب سجلات الإشعارات:', err.message);
           reject(err);
         } else {
           resolve(rows);
