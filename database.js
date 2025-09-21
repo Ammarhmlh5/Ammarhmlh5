@@ -1269,7 +1269,10 @@ class Database {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       `;
       
-      this.db.run(query, [company_id, transaction_type, is_enabled, JSON.stringify(channels), send_to_subscriber, send_to_company, auto_send, created_by], function(err) {
+      // Ensure channels is properly serialized
+      const channelsStr = Array.isArray(channels) ? JSON.stringify(channels) : JSON.stringify([channels]);
+      
+      this.db.run(query, [company_id, transaction_type, is_enabled, channelsStr, send_to_subscriber, send_to_company, auto_send, created_by], function(err) {
         if (err) {
           console.error('خطأ في حفظ إعدادات الإشعارات:', err.message);
           reject(err);
@@ -1298,10 +1301,20 @@ class Database {
           reject(err);
         } else {
           // Parse JSON channels for each row
-          const settings = rows.map(row => ({
-            ...row,
-            channels: JSON.parse(row.channels)
-          }));
+          const settings = rows.map(row => {
+            try {
+              return {
+                ...row,
+                channels: JSON.parse(row.channels)
+              };
+            } catch (parseError) {
+              console.error('خطأ في تحليل قنوات الإشعار:', parseError.message, 'Raw value:', row.channels);
+              return {
+                ...row,
+                channels: ['sms'] // Default fallback
+              };
+            }
+          });
           resolve(settings);
         }
       });
@@ -1360,10 +1373,20 @@ class Database {
           reject(err);
         } else {
           // Parse JSON variables for each row
-          const templates = rows.map(row => ({
-            ...row,
-            variables: JSON.parse(row.variables || '[]')
-          }));
+          const templates = rows.map(row => {
+            try {
+              return {
+                ...row,
+                variables: JSON.parse(row.variables || '[]')
+              };
+            } catch (parseError) {
+              console.error('خطأ في تحليل متغيرات القالب:', parseError.message);
+              return {
+                ...row,
+                variables: []
+              };
+            }
+          });
           resolve(templates);
         }
       });
