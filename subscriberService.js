@@ -104,7 +104,11 @@ class SubscriberService {
       
       // Create accounting entries if connection amount > 0
       if (cleanData.connection_amount > 0) {
-        await this.createConnectionAccountingEntries(savedSubscriber, cleanData.created_by);
+        await this.createConnectionAccountingEntries(
+          savedSubscriber, 
+          cleanData.created_by, 
+          subscriberData.payment_assigned_to || null
+        );
       }
 
       return {
@@ -124,7 +128,7 @@ class SubscriberService {
   }
 
   // Create accounting entries for connection amount
-  async createConnectionAccountingEntries(subscriber, createdBy) {
+  async createConnectionAccountingEntries(subscriber, createdBy, paymentAssignedTo = null) {
     try {
       const { company_id, account_number, connection_amount, full_name } = subscriber;
       
@@ -147,7 +151,8 @@ class SubscriberService {
         description: `استلام مبلغ ربط التيار من المشترك ${full_name} - حساب رقم ${account_number}`,
         reference_number: account_number,
         transaction_date: new Date().toISOString().split('T')[0],
-        created_by: createdBy
+        created_by: createdBy,
+        assigned_to: paymentAssignedTo || createdBy // Assign to specified user or default to creator
       };
 
       // Save both transactions
@@ -312,6 +317,27 @@ class SubscriberService {
       return {
         success: false,
         message: error.message || 'فشل في إلغاء تفعيل المشترك'
+      };
+    }
+  }
+
+  // Get users for payment assignment dropdown
+  async getUsersForPaymentAssignment(companyId) {
+    try {
+      const users = await this.database.getUsersByCompany(companyId);
+      
+      return {
+        success: true,
+        users: users,
+        message: 'تم جلب قائمة المستخدمين بنجاح'
+      };
+
+    } catch (error) {
+      console.error('خطأ في جلب قائمة المستخدمين:', error.message);
+      return {
+        success: false,
+        users: [],
+        message: error.message || 'فشل في جلب قائمة المستخدمين'
       };
     }
   }

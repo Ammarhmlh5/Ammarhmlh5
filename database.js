@@ -285,20 +285,30 @@ class Database {
             return;
           }
 
-          let migrations = [];
-          
-          // Check user table columns
-          const hasPassword = userColumns.some(col => col.name === 'password');
-          const hasResetToken = userColumns.some(col => col.name === 'reset_token');
-          const hasResetTokenExpires = userColumns.some(col => col.name === 'reset_token_expires');
-          const hasCanAccessMultiple = userColumns.some(col => col.name === 'can_access_multiple_companies');
-          
-          // Check company table columns
-          const hasSubscriptionStatus = companyColumns.some(col => col.name === 'subscription_status');
-          const hasSubscriptionPlan = companyColumns.some(col => col.name === 'subscription_plan');
-          const hasMaxUsers = companyColumns.some(col => col.name === 'max_users');
-          const hasMaxStorage = companyColumns.some(col => col.name === 'max_storage_mb');
-          const hasSubscriptionExpires = companyColumns.some(col => col.name === 'subscription_expires_at');
+          this.db.all("PRAGMA table_info(transactions)", (err, transactionColumns) => {
+            if (err) {
+              console.error('خطأ في فحص هيكل جدول المعاملات:', err.message);
+              reject(err);
+              return;
+            }
+
+            let migrations = [];
+            
+            // Check user table columns
+            const hasPassword = userColumns.some(col => col.name === 'password');
+            const hasResetToken = userColumns.some(col => col.name === 'reset_token');
+            const hasResetTokenExpires = userColumns.some(col => col.name === 'reset_token_expires');
+            const hasCanAccessMultiple = userColumns.some(col => col.name === 'can_access_multiple_companies');
+            
+            // Check company table columns
+            const hasSubscriptionStatus = companyColumns.some(col => col.name === 'subscription_status');
+            const hasSubscriptionPlan = companyColumns.some(col => col.name === 'subscription_plan');
+            const hasMaxUsers = companyColumns.some(col => col.name === 'max_users');
+            const hasMaxStorage = companyColumns.some(col => col.name === 'max_storage_mb');
+            const hasSubscriptionExpires = companyColumns.some(col => col.name === 'subscription_expires_at');
+            
+            // Check transaction table columns
+            const hasAssignedTo = transactionColumns.some(col => col.name === 'assigned_to');
           
           // Add missing user columns
           if (!hasPassword) {
@@ -330,6 +340,11 @@ class Database {
           if (!hasSubscriptionExpires) {
             migrations.push("ALTER TABLE companies ADD COLUMN subscription_expires_at DATETIME");
           }
+          
+          // Add missing transaction columns
+          if (!hasAssignedTo) {
+            migrations.push("ALTER TABLE transactions ADD COLUMN assigned_to INTEGER REFERENCES users(id)");
+          }
 
           if (migrations.length === 0) {
             console.log('جميع العمليات الترحيلية مكتملة');
@@ -353,6 +368,7 @@ class Database {
                   resolve();
                 }
               }
+            });
             });
           });
         });
@@ -757,17 +773,17 @@ class Database {
   async saveTransaction(transactionData) {
     return new Promise(async (resolve, reject) => {
       try {
-        const { company_id, transaction_type, amount, description, reference_number, transaction_date, created_by } = transactionData;
+        const { company_id, transaction_type, amount, description, reference_number, transaction_date, created_by, assigned_to } = transactionData;
         
         // Get next electronic number
         const electronicNumber = await this.getNextTransactionNumber(company_id, transaction_type);
         
         const query = `
-          INSERT INTO transactions (company_id, electronic_number, transaction_type, amount, description, reference_number, transaction_date, created_by)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO transactions (company_id, electronic_number, transaction_type, amount, description, reference_number, transaction_date, created_by, assigned_to)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
         
-        this.db.run(query, [company_id, electronicNumber, transaction_type, amount, description, reference_number, transaction_date, created_by], function(err) {
+        this.db.run(query, [company_id, electronicNumber, transaction_type, amount, description, reference_number, transaction_date, created_by, assigned_to], function(err) {
           if (err) {
             console.error('خطأ في حفظ المعاملة:', err.message);
             reject(err);
@@ -1118,6 +1134,28 @@ class Database {
         } else {
           console.log('تم إلغاء تفعيل المشترك بنجاح');
           resolve(this.changes);
+        }
+      });
+    });
+  }
+
+  // Get users by company for payment assignment
+  async getUsersByCompany(companyId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT u.id, u.name, u.email, u.role
+        FROM users u
+        LEFT JOIN user_company_access uca ON u.id = uca.user_id
+        WHERE (u.company_id = ? OR uca.company_id = ?) AND u.is_active = 1
+        ORDER BY u.name
+      `;
+      
+      this.db.all(query, [companyId, companyId], (err, rows) => {
+        if (err) {
+          console.error('خطأ في جلب مستخدمي الشركة:', err.message);
+          reject(err);
+        } else {
+          resolve(rows);
         }
       });
     });
