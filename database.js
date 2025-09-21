@@ -136,6 +136,33 @@ class Database {
         )
       `;
 
+      // Create subscribers table for subscriber management
+      const createSubscribersTable = `
+        CREATE TABLE IF NOT EXISTS subscribers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          company_id INTEGER NOT NULL,
+          account_number TEXT NOT NULL,
+          full_name TEXT NOT NULL,
+          address TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          business_type TEXT,
+          meter_system_type TEXT,
+          tariff_type TEXT,
+          tariff_group TEXT,
+          id_card_number TEXT,
+          photo_path TEXT,
+          property_ownership TEXT CHECK(property_ownership IN ('ملك', 'إيجار')),
+          connection_amount DECIMAL(15,2) DEFAULT 0,
+          is_active BOOLEAN DEFAULT 1,
+          created_by INTEGER,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (company_id) REFERENCES companies (id),
+          FOREIGN KEY (created_by) REFERENCES users (id),
+          UNIQUE(company_id, account_number)
+        )
+      `;
+
       // Create admin_logs table for monitoring
       const createAdminLogsTable = `
         CREATE TABLE IF NOT EXISTS admin_logs (
@@ -201,18 +228,28 @@ class Database {
                             } else {
                               console.log('تم إنشاء جدول الحسابات بنجاح');
                               
-                              // Create admin logs table
-                              this.db.run(createAdminLogsTable, (err) => {
+                              // Create subscribers table
+                              this.db.run(createSubscribersTable, (err) => {
                                 if (err) {
-                                  console.error('خطأ في إنشاء جدول سجلات المدير:', err.message);
+                                  console.error('خطأ في إنشاء جدول المشتركين:', err.message);
                                   reject(err);
                                 } else {
-                                  console.log('تم إنشاء جدول سجلات المدير بنجاح');
+                                  console.log('تم إنشاء جدول المشتركين بنجاح');
                                   
-                                  // Run migrations to add missing columns
-                                  this.runMigrations()
-                                    .then(() => resolve())
-                                    .catch(reject);
+                                  // Create admin logs table
+                                  this.db.run(createAdminLogsTable, (err) => {
+                                    if (err) {
+                                      console.error('خطأ في إنشاء جدول سجلات المدير:', err.message);
+                                      reject(err);
+                                    } else {
+                                      console.log('تم إنشاء جدول سجلات المدير بنجاح');
+                                      
+                                      // Run migrations to add missing columns
+                                      this.runMigrations()
+                                        .then(() => resolve())
+                                        .catch(reject);
+                                    }
+                                  });
                                 }
                               });
                             }
@@ -888,6 +925,200 @@ class Database {
             }
           }
         });
+      });
+    });
+  }
+
+  // Generate next subscriber account number
+  async getNextSubscriberAccountNumber(companyId) {
+    return new Promise((resolve, reject) => {
+      // Get company's sequential number and current subscriber count
+      const companyQuery = `SELECT id FROM companies WHERE id = ?`;
+      const subscriberCountQuery = `SELECT COUNT(*) + 1 as next_number FROM subscribers WHERE company_id = ?`;
+      
+      this.db.get(companyQuery, [companyId], (err, company) => {
+        if (err) {
+          console.error('خطأ في جلب معلومات الشركة:', err.message);
+          reject(err);
+        } else if (!company) {
+          reject(new Error('الشركة غير موجودة'));
+        } else {
+          this.db.get(subscriberCountQuery, [companyId], (err, result) => {
+            if (err) {
+              console.error('خطأ في جلب عدد المشتركين:', err.message);
+              reject(err);
+            } else {
+              // Format: COMP{company_id}-SUB{subscriber_number}
+              // e.g., COMP1-SUB000001
+              const accountNumber = `COMP${companyId}-SUB${result.next_number.toString().padStart(6, '0')}`;
+              resolve(accountNumber);
+            }
+          });
+        }
+      });
+    });
+  }
+
+  // Save subscriber with unique account number
+  async saveSubscriber(subscriberData) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const { 
+          company_id, full_name, address, phone, business_type, 
+          meter_system_type, tariff_type, tariff_group, id_card_number, 
+          photo_path, property_ownership, connection_amount, created_by 
+        } = subscriberData;
+        
+        // Generate unique account number
+        const accountNumber = await this.getNextSubscriberAccountNumber(company_id);
+        
+        const query = `
+          INSERT INTO subscribers (
+            company_id, account_number, full_name, address, phone, 
+            business_type, meter_system_type, tariff_type, tariff_group, 
+            id_card_number, photo_path, property_ownership, connection_amount, created_by
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        
+        this.db.run(query, [
+          company_id, accountNumber, full_name, address, phone, 
+          business_type, meter_system_type, tariff_type, tariff_group, 
+          id_card_number, photo_path, property_ownership, connection_amount, created_by
+        ], function(err) {
+          if (err) {
+            console.error('خطأ في حفظ المشترك:', err.message);
+            reject(err);
+          } else {
+            console.log('تم حفظ المشترك بنجاح بالرقم:', accountNumber);
+            resolve({
+              id: this.lastID,
+              account_number: accountNumber,
+              ...subscriberData
+            });
+          }
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  // Get subscribers by company
+  async getSubscribersByCompany(companyId, limit = 50, offset = 0) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT s.*, u.name as created_by_name
+        FROM subscribers s
+        LEFT JOIN users u ON s.created_by = u.id
+        WHERE s.company_id = ? AND s.is_active = 1
+        ORDER BY s.created_at DESC
+        LIMIT ? OFFSET ?
+      `;
+      
+      this.db.all(query, [companyId, limit, offset], (err, rows) => {
+        if (err) {
+          console.error('خطأ في جلب مشتركي الشركة:', err.message);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  // Get subscriber by ID
+  async getSubscriberById(subscriberId, companyId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT s.*, u.name as created_by_name
+        FROM subscribers s
+        LEFT JOIN users u ON s.created_by = u.id
+        WHERE s.id = ? AND s.company_id = ? AND s.is_active = 1
+      `;
+      
+      this.db.get(query, [subscriberId, companyId], (err, row) => {
+        if (err) {
+          console.error('خطأ في جلب بيانات المشترك:', err.message);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+  }
+
+  // Get subscriber by account number
+  async getSubscriberByAccountNumber(accountNumber, companyId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT s.*, u.name as created_by_name
+        FROM subscribers s
+        LEFT JOIN users u ON s.created_by = u.id
+        WHERE s.account_number = ? AND s.company_id = ? AND s.is_active = 1
+      `;
+      
+      this.db.get(query, [accountNumber, companyId], (err, row) => {
+        if (err) {
+          console.error('خطأ في جلب بيانات المشترك:', err.message);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+  }
+
+  // Update subscriber
+  async updateSubscriber(subscriberId, companyId, updateData) {
+    return new Promise((resolve, reject) => {
+      const { 
+        full_name, address, phone, business_type, meter_system_type, 
+        tariff_type, tariff_group, id_card_number, photo_path, 
+        property_ownership, connection_amount 
+      } = updateData;
+      
+      const query = `
+        UPDATE subscribers SET 
+          full_name = ?, address = ?, phone = ?, business_type = ?, 
+          meter_system_type = ?, tariff_type = ?, tariff_group = ?, 
+          id_card_number = ?, photo_path = ?, property_ownership = ?, 
+          connection_amount = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND company_id = ?
+      `;
+      
+      this.db.run(query, [
+        full_name, address, phone, business_type, meter_system_type, 
+        tariff_type, tariff_group, id_card_number, photo_path, 
+        property_ownership, connection_amount, subscriberId, companyId
+      ], function(err) {
+        if (err) {
+          console.error('خطأ في تحديث بيانات المشترك:', err.message);
+          reject(err);
+        } else {
+          console.log('تم تحديث بيانات المشترك بنجاح');
+          resolve(this.changes);
+        }
+      });
+    });
+  }
+
+  // Deactivate subscriber (soft delete)
+  async deactivateSubscriber(subscriberId, companyId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        UPDATE subscribers SET 
+          is_active = 0, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND company_id = ?
+      `;
+      
+      this.db.run(query, [subscriberId, companyId], function(err) {
+        if (err) {
+          console.error('خطأ في إلغاء تفعيل المشترك:', err.message);
+          reject(err);
+        } else {
+          console.log('تم إلغاء تفعيل المشترك بنجاح');
+          resolve(this.changes);
+        }
       });
     });
   }

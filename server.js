@@ -8,6 +8,7 @@ const CompanyService = require('./companyService');
 const AuthService = require('./authService');
 const TransactionService = require('./transactionService');
 const AdminService = require('./adminService');
+const SubscriberService = require('./subscriberService');
 const CompanyMiddleware = require('./companyMiddleware');
 
 const app = express();
@@ -19,6 +20,7 @@ const companyService = new CompanyService();
 const authService = new AuthService();
 const transactionService = new TransactionService();
 const adminService = new AdminService();
+const subscriberService = new SubscriberService();
 const companyMiddleware = new CompanyMiddleware();
 
 // Middleware
@@ -594,6 +596,157 @@ app.get('/api/admin/subscription-plans', (req, res) => {
   });
 });
 
+// Subscriber Management API Routes
+
+// Create a new subscriber
+app.post('/api/subscribers', 
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      console.log('طلب إضافة مشترك جديد:', req.body);
+      
+      // Add company ID and creator ID from session
+      const subscriberData = {
+        ...req.body,
+        company_id: req.session.current_company_id,
+        created_by: req.session.user.id
+      };
+      
+      const result = await subscriberService.createSubscriber(subscriberData);
+      
+      if (result.success) {
+        res.status(201).json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      console.error('خطأ في API إضافة المشترك:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم',
+        subscriber: null
+      });
+    }
+  }
+);
+
+// Get all subscribers for current company
+app.get('/api/subscribers', 
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit) || 50;
+      const offset = parseInt(req.query.offset) || 0;
+      
+      const result = await subscriberService.getSubscribersByCompany(req.session.current_company_id, limit, offset);
+      res.json(result);
+    } catch (error) {
+      console.error('خطأ في API جلب المشتركين:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم',
+        subscribers: []
+      });
+    }
+  }
+);
+
+// Get subscriber by ID
+app.get('/api/subscribers/:id', 
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const result = await subscriberService.getSubscriberById(req.params.id, req.session.current_company_id);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(404).json(result);
+      }
+    } catch (error) {
+      console.error('خطأ في API جلب بيانات المشترك:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم',
+        subscriber: null
+      });
+    }
+  }
+);
+
+// Get subscriber by account number
+app.get('/api/subscribers/account/:accountNumber', 
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const result = await subscriberService.getSubscriberByAccountNumber(req.params.accountNumber, req.session.current_company_id);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(404).json(result);
+      }
+    } catch (error) {
+      console.error('خطأ في API جلب بيانات المشترك:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم',
+        subscriber: null
+      });
+    }
+  }
+);
+
+// Update subscriber
+app.put('/api/subscribers/:id', 
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const result = await subscriberService.updateSubscriber(req.params.id, req.session.current_company_id, req.body);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      console.error('خطأ في API تحديث بيانات المشترك:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم'
+      });
+    }
+  }
+);
+
+// Deactivate subscriber
+app.delete('/api/subscribers/:id', 
+  companyMiddleware.requireAuth(),
+  companyMiddleware.requireCompanyAccess(),
+  async (req, res) => {
+    try {
+      const result = await subscriberService.deactivateSubscriber(req.params.id, req.session.current_company_id);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(404).json(result);
+      }
+    } catch (error) {
+      console.error('خطأ في API إلغاء تفعيل المشترك:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'خطأ داخلي في الخادم'
+      });
+    }
+  }
+);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('خطأ غير متوقع:', err.stack);
@@ -620,6 +773,7 @@ async function startServer() {
     await authService.init();
     await transactionService.init();
     await adminService.init();
+    await subscriberService.init();
     await companyMiddleware.init();
     
     // Start the server
@@ -630,6 +784,7 @@ async function startServer() {
       console.log(`🏢 Company API: http://localhost:${PORT}/api/companies`);
       console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
       console.log(`💰 Transaction API: http://localhost:${PORT}/api/transactions`);
+      console.log(`👥 Subscriber API: http://localhost:${PORT}/api/subscribers`);
       console.log(`⚙️ Admin API: http://localhost:${PORT}/api/admin`);
     });
   } catch (error) {
@@ -646,6 +801,7 @@ process.on('SIGINT', () => {
   authService.close();
   transactionService.close();
   adminService.close();
+  subscriberService.close();
   companyMiddleware.close();
   process.exit(0);
 });
@@ -657,6 +813,7 @@ process.on('SIGTERM', () => {
   authService.close();
   transactionService.close();
   adminService.close();
+  subscriberService.close();
   companyMiddleware.close();
   process.exit(0);
 });
