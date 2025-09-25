@@ -1739,6 +1739,16 @@
             // Show change password section and hide set password section
             document.getElementById('changePasswordSection').style.display = 'block';
             document.getElementById('setPasswordSection').style.display = 'none';
+            
+            // Update tab visibility based on user role
+            updateCompanySpecificTabs();
+            
+            // Load admin data if user is system admin
+            if (currentUser && currentUser.role === 'system_admin') {
+                loadSystemStatistics();
+                loadCompaniesManagement();
+                loadActivityLogs();
+            }
         }
 
         // Update UI for logged out user
@@ -2197,7 +2207,8 @@
             document.getElementById('subscribers-tab-btn').style.display = 'none';
             document.getElementById('transactions-tab-btn').style.display = 'none';
             document.getElementById('notifications-tab-btn').style.display = 'none';
-            document.getElementById('admin-tab-btn').style.display = 'none';
+            // Don't hide admin tab here - it should stay visible for system admins
+            // Admin tab visibility is controlled separately in updateTabVisibility()
         }
 
         // Transaction Functions
@@ -2569,17 +2580,66 @@ ${result.subscriber.connection_amount > 0 ? '📊 تم إنشاء القيود �
             if (currentUser && currentCompanyId) {
                 subscribersTab.style.display = 'inline-block';
                 transactionsTab.style.display = 'inline-block';
-                if (currentUser.role === 'system_admin') {
-                    adminTab.style.display = 'inline-block';
-                }
             } else {
                 subscribersTab.style.display = 'none';
                 transactionsTab.style.display = 'none';
+            }
+            
+            // System admin tab should always be visible for system_admin users
+            if (currentUser && currentUser.role === 'system_admin') {
+                adminTab.style.display = 'inline-block';
+            } else {
                 adminTab.style.display = 'none';
             }
         }
 
         // Admin Functions
+        async function loadSystemStatistics() {
+            if (!currentUser || currentUser.role !== 'system_admin') return;
+            
+            try {
+                const response = await fetch('/api/admin/statistics');
+                const result = await response.json();
+                
+                const statsDiv = document.getElementById('systemStats');
+                
+                if (result.success && result.statistics) {
+                    const stats = result.statistics;
+                    statsDiv.innerHTML = `
+                        <div class="stat-card">
+                            <h4>إجمالي الشركات</h4>
+                            <div class="value">${stats.totalCompanies || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>الشركات النشطة</h4>
+                            <div class="value">${stats.activeCompanies || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>إجمالي المستخدمين</h4>
+                            <div class="value">${stats.totalUsers || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>إجمالي المعاملات</h4>
+                            <div class="value">${stats.totalTransactions || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>المشتركين النشطين</h4>
+                            <div class="value">${stats.activeSubscribers || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>الإشعارات المرسلة</h4>
+                            <div class="value">${stats.totalNotifications || 0}</div>
+                        </div>
+                    `;
+                } else {
+                    statsDiv.innerHTML = '<div class="loading">لا توجد إحصائيات متاحة</div>';
+                }
+            } catch (error) {
+                console.error('Error loading system statistics:', error);
+                document.getElementById('systemStats').innerHTML = '<div class="loading">خطأ في تحميل الإحصائيات</div>';
+            }
+        }
+
         async function loadCompaniesManagement() {
             if (!currentUser || currentUser.role !== 'system_admin') return;
             
