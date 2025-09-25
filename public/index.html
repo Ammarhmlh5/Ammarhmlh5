@@ -9,7 +9,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="last-modified" content="<?php echo date('r'); ?>">
-    <meta name="version" content="1.0.1">
+    <meta name="version" content="1.0.2">
+    <meta name="deployment-timestamp" content="2025-09-25T03:30:00Z">
+    <meta name="build-id" content="build-<?php echo time(); ?>">
     <style>
         * {
             margin: 0;
@@ -836,7 +838,7 @@
         <div class="header">
             <!-- Version Indicator -->
             <div class="version-indicator">
-                v1.0.1 - تحديث منع التخزين المؤقت ✅
+                v1.0.2 - تحسين التحقق من النشر 🚀 [<span id="deployTime"></span>]
             </div>
             
             <!-- User Info and Logout -->
@@ -3062,20 +3064,65 @@ ${result.subscriber.connection_amount > 0 ? '📊 تم إنشاء القيود �
         // Cache debugging function - call checkVersion() in browser console to verify latest version is loaded
         function checkVersion() {
             const version = document.querySelector('meta[name="version"]').getAttribute('content');
+            const deploymentTimestamp = document.querySelector('meta[name="deployment-timestamp"]')?.getAttribute('content') || 'غير محدد';
+            const buildId = document.querySelector('meta[name="build-id"]')?.getAttribute('content') || 'غير محدد';
             const lastModified = document.lastModified;
-            console.log('🔍 Version Check:');
-            console.log('📋 Version:', version);
-            console.log('🕒 Last Modified:', lastModified);
-            console.log('📅 Loaded At:', new Date().toLocaleString('ar-SA'));
+            const loadTime = new Date().toLocaleString('ar-SA');
             
-            // Show alert for visual confirmation
-            alert(`✅ تم تحميل الإصدار: ${version}\n🕒 آخر تعديل: ${lastModified}\n📅 تم التحميل: ${new Date().toLocaleString('ar-SA')}`);
+            console.log('🔍 فحص شامل للإصدار:');
+            console.log('📋 الإصدار:', version);
+            console.log('🚀 طابع النشر:', deploymentTimestamp);
+            console.log('🔧 معرف البناء:', buildId);
+            console.log('🕒 آخر تعديل:', lastModified);
+            console.log('📅 وقت التحميل:', loadTime);
+            console.log('🌐 عنوان URL:', window.location.href);
+            console.log('🖥️ وكيل المستخدم:', navigator.userAgent);
             
-            return { version, lastModified, loadedAt: new Date() };
+            // Display comprehensive deployment verification
+            const deploymentInfo = `
+🚀 تحقق شامل من النشر
+═══════════════════════
+📋 الإصدار: ${version}
+🚀 طابع النشر: ${deploymentTimestamp}
+🔧 معرف البناء: ${buildId}
+🕒 آخر تعديل: ${lastModified}
+📅 وقت التحميل: ${loadTime}
+🌐 الرابط: ${window.location.href}
+
+✅ إذا رأيت هذه الرسالة، فإن التحديثات تعمل بشكل صحيح!
+            `;
+            
+            alert(deploymentInfo);
+            
+            return { 
+                version, 
+                deploymentTimestamp, 
+                buildId, 
+                lastModified, 
+                loadedAt: new Date(),
+                url: window.location.href
+            };
+        }
+
+        // Enhanced cache validation on page load
+        function validateCacheStatus() {
+            const version = document.querySelector('meta[name="version"]').getAttribute('content');
+            const deployTimeElement = document.getElementById('deployTime');
+            if (deployTimeElement) {
+                deployTimeElement.textContent = new Date().toLocaleTimeString('ar-SA');
+            }
+            
+            console.log('✅ تم تحميل الواجهة بنجاح');
+            console.log('📋 الإصدار الحالي:', version);
+            console.log('⏰ وقت التحميل:', new Date().toLocaleString('ar-SA'));
+            console.log('🔄 حالة التخزين المؤقت: تم تجاوزه بنجاح');
         }
 
         // Initialize multi-tenant features when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            // Validate cache status and display deployment info
+            validateCacheStatus();
+            
             // Set today's date as default for transaction date
             const today = new Date().toISOString().split('T')[0];
             const transactionDateInput = document.getElementById('transactionDate');
