@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة المستخدمين</title>
+    <!-- Cache prevention meta tags to ensure interface updates are always reflected -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="last-modified" content="<?php echo date('r'); ?>">
+    <meta name="version" content="1.0.1">
     <style>
         * {
             margin: 0;
@@ -106,6 +112,19 @@
         .logout-btn:hover {
             background: rgba(255,255,255,0.3);
             transform: translateY(-1px);
+        }
+
+        .version-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
         .auth-section {
@@ -815,6 +834,11 @@
 <body>
     <div class="container">
         <div class="header">
+            <!-- Version Indicator -->
+            <div class="version-indicator">
+                v1.0.1 - تحديث منع التخزين المؤقت ✅
+            </div>
+            
             <!-- User Info and Logout -->
             <div id="userInfo" class="user-info" style="display: none;">
                 <div class="current-company" id="currentCompany">🏢 لم يتم اختيار شركة</div>
@@ -3033,6 +3057,21 @@ ${result.subscriber.connection_amount > 0 ? '📊 تم إنشاء القيود �
             } catch (error) {
                 console.error('Error checking auth status:', error);
             }
+        }
+
+        // Cache debugging function - call checkVersion() in browser console to verify latest version is loaded
+        function checkVersion() {
+            const version = document.querySelector('meta[name="version"]').getAttribute('content');
+            const lastModified = document.lastModified;
+            console.log('🔍 Version Check:');
+            console.log('📋 Version:', version);
+            console.log('🕒 Last Modified:', lastModified);
+            console.log('📅 Loaded At:', new Date().toLocaleString('ar-SA'));
+            
+            // Show alert for visual confirmation
+            alert(`✅ تم تحميل الإصدار: ${version}\n🕒 آخر تعديل: ${lastModified}\n📅 تم التحميل: ${new Date().toLocaleString('ar-SA')}`);
+            
+            return { version, lastModified, loadedAt: new Date() };
         }
 
         // Initialize multi-tenant features when page loads
