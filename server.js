@@ -45,19 +45,26 @@ app.use(session({
   }
 }));
 
-// Static files with cache control headers to prevent caching issues
+// Static files with enhanced cache control headers to prevent caching issues
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, path) => {
-    // Prevent caching for HTML files to ensure interface updates are always reflected
+    // Enhanced cache prevention for HTML files with additional headers
     if (path.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
+      res.setHeader('Last-Modified', new Date().toUTCString());
+      res.setHeader('ETag', `"${Date.now()}"`);
+      res.setHeader('Vary', 'User-Agent');
+      res.setHeader('X-Version', '1.0.2');
+      res.setHeader('X-Deployment-Time', new Date().toISOString());
     }
-    // Allow short-term caching for assets but force revalidation
+    // Enhanced short-term caching for assets with forced revalidation
     else if (path.endsWith('.css') || path.endsWith('.js')) {
       res.setHeader('Cache-Control', 'no-cache, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Last-Modified', new Date().toUTCString());
+      res.setHeader('ETag', `"${Date.now()}"`);
     }
     // Images can be cached for a short time
     else if (path.match(/\.(jpg|jpeg|png|gif|ico|svg)$/)) {
@@ -68,13 +75,18 @@ app.use(express.static(path.join(__dirname, 'public'), {
 
 // Routes
 
-// Serve the main page with cache prevention
+// Serve the main page with enhanced cache prevention
 app.get('/', (req, res) => {
-  // Set headers to prevent caching for the main page
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  // Set enhanced headers to prevent caching for the main page
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   res.setHeader('Last-Modified', new Date().toUTCString());
+  res.setHeader('ETag', `"main-${Date.now()}"`);
+  res.setHeader('Vary', 'User-Agent');
+  res.setHeader('X-Version', '1.0.2');
+  res.setHeader('X-Deployment-Time', new Date().toISOString());
+  res.setHeader('X-Cache-Status', 'BYPASS');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
