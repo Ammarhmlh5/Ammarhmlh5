@@ -45,12 +45,36 @@ app.use(session({
   }
 }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+// Static files with cache control headers to prevent caching issues
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, path) => {
+    // Prevent caching for HTML files to ensure interface updates are always reflected
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+    // Allow short-term caching for assets but force revalidation
+    else if (path.endsWith('.css') || path.endsWith('.js')) {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+    }
+    // Images can be cached for a short time
+    else if (path.match(/\.(jpg|jpeg|png|gif|ico|svg)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes
+    }
+  }
+}));
 
 // Routes
 
-// Serve the main page
+// Serve the main page with cache prevention
 app.get('/', (req, res) => {
+  // Set headers to prevent caching for the main page
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Last-Modified', new Date().toUTCString());
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
