@@ -40,6 +40,20 @@ app.use(express.static(path.join(__dirname, 'public'), {
 - تم تحديث `package.json` ليتضمن رقم إصدار جديد
 - رقم الإصدار يظهر في meta tags
 
+### 4. مؤشر الإصدار المرئي
+تم إضافة مؤشر مرئي في الواجهة يعرض:
+- رقم الإصدار الحالي
+- رسالة تأكيد التحديث
+- يظهر في الزاوية العلوية اليمنى
+
+### 5. وظيفة فحص الإصدار
+تم إضافة JavaScript function يمكن استخدامها للتحقق:
+
+```javascript
+// في console المتصفح:
+checkVersion()
+```
+
 ## خطوات النشر لضمان ظهور التحديثات
 
 ### للنشر على Bolt أو منصات مشابهة:
@@ -53,7 +67,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
 2. **بعد النشر:**
    - أعد تشغيل التطبيق على المنصة
    - امسح cache المتصفح (Ctrl+F5 أو Cmd+Shift+R)
-   - تحقق من وجود parameter `?v=1.0.1` في الروابط
+   - تحقق من مؤشر الإصدار في الزاوية العلوية اليمنى
+   - استخدم `checkVersion()` في console للتحقق
 
 3. **للتحقق من عدم وجود cache:**
    - افتح Developer Tools في المتصفح
@@ -65,6 +80,14 @@ app.use(express.static(path.join(__dirname, 'public'), {
 - **Bolt Specific**: قد تحتاج لإعادة deploy التطبيق كاملاً لضمان تحديث الملفات
 - **CDN Caching**: إذا كانت المنصة تستخدم CDN، قد تحتاج للانتظار بضع دقائق
 - **Browser Testing**: اختبر في Private/Incognito mode لتجنب browser cache
+
+## التحقق من التحديث:
+
+### مؤشرات نجح الحل:
+✅ مؤشر الإصدار يظهر: "v1.0.1 - تحديث منع التخزين المؤقت"
+✅ `checkVersion()` في console يعرض الإصدار الصحيح
+✅ Network tab يظهر تحميل الملفات من الخادم
+✅ Response headers تحتوي على `Cache-Control: no-cache`
 
 ## ملاحظات مهمة:
 
@@ -83,3 +106,13 @@ curl -I http://localhost:3000/
 # Pragma: no-cache
 # Expires: 0
 ```
+
+## استكشاف الأخطاء:
+
+إذا لم تظهر التحديثات بعد:
+
+1. **تحقق من مؤشر الإصدار**: يجب أن يظهر الإصدار الجديد
+2. **امسح البيانات**: Settings > Clear browsing data > Cached images and files
+3. **Hard Refresh**: Ctrl+Shift+R (أو Cmd+Shift+R على Mac)
+4. **Private Mode**: افتح الصفحة في وضع التصفح الخاص
+5. **فحص Network**: تأكد أن الملفات يتم تحميلها بحجم كامل وليس "from cache"

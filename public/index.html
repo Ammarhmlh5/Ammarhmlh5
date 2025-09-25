@@ -3059,6 +3059,21 @@ ${result.subscriber.connection_amount > 0 ? '📊 تم إنشاء القيود �
             }
         }
 
+        // Cache debugging function - call checkVersion() in browser console to verify latest version is loaded
+        function checkVersion() {
+            const version = document.querySelector('meta[name="version"]').getAttribute('content');
+            const lastModified = document.lastModified;
+            console.log('🔍 Version Check:');
+            console.log('📋 Version:', version);
+            console.log('🕒 Last Modified:', lastModified);
+            console.log('📅 Loaded At:', new Date().toLocaleString('ar-SA'));
+            
+            // Show alert for visual confirmation
+            alert(`✅ تم تحميل الإصدار: ${version}\n🕒 آخر تعديل: ${lastModified}\n📅 تم التحميل: ${new Date().toLocaleString('ar-SA')}`);
+            
+            return { version, lastModified, loadedAt: new Date() };
+        }
+
         // Initialize multi-tenant features when page loads
         document.addEventListener('DOMContentLoaded', function() {
             // Set today's date as default for transaction date
