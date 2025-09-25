@@ -739,6 +739,65 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
+        
+        .multi-tenant-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid #667eea;
+        }
+        
+        .info-card {
+            text-align: center;
+        }
+        
+        .info-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            text-align: right;
+        }
+        
+        .info-card li {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .user-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .user-note p {
+            margin: 0;
+            color: #856404;
+            font-size: 0.95rem;
+        }
+        
+        .company-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            text-align: center;
+            color: #e3f2fd;
+        }
     </style>
 </head>
 <body>
@@ -746,11 +805,15 @@
         <div class="header">
             <!-- User Info and Logout -->
             <div id="userInfo" class="user-info" style="display: none;">
-                <div class="current-company" id="currentCompany">لم يتم اختيار شركة</div>
+                <div class="current-company" id="currentCompany">🏢 لم يتم اختيار شركة</div>
                 
                 <select class="company-selector" id="companySelector" onchange="switchCompany()" style="display: none;">
-                    <option value="">اختر الشركة...</option>
+                    <option value="">🏢 اختر الشركة...</option>
                 </select>
+                
+                <div id="companyCount" class="company-count" style="display: none;">
+                    متصل بـ <span id="companyCountNumber">0</span> شركة
+                </div>
                 
                 <div class="user-details">
                     <span id="userEmail">البريد الإلكتروني</span>
@@ -758,28 +821,32 @@
                 </div>
             </div>
             
-            <h1>نظام إدارة المستخدمين والشركات</h1>
-            <p>تسجيل شركات جديدة مع تفعيل حساب المدير تلقائياً وإدارة المستخدمين</p>
+            <h1>نظام إدارة المستخدمين والشركات - متعدد الشركات</h1>
+            <p>🏢 نظام متكامل متعدد الشركات مع عزل كامل للبيانات | تسجيل شركات جديدة مع تفعيل حساب المدير تلقائياً</p>
         </div>
         
         <div class="main-content">
             <!-- Tab Navigation -->
             <div class="tab-navigation">
-                <button class="tab-button active" onclick="showTab('user-tab')">إضافة مستخدم فردي</button>
-                <button class="tab-button" onclick="showTab('company-tab')">تسجيل شركة جديدة</button>
-                <button class="tab-button" onclick="showTab('login-tab')">تسجيل الدخول</button>
-                <button class="tab-button" onclick="showTab('password-tab')">إدارة كلمة المرور</button>
-                <button class="tab-button" id="subscribers-tab-btn" onclick="showTab('subscribers-tab')" style="display: none;">إدارة المشتركين</button>
-                <button class="tab-button" id="transactions-tab-btn" onclick="showTab('transactions-tab')" style="display: none;">المعاملات المالية</button>
-                <button class="tab-button" id="notifications-tab-btn" onclick="showTab('notifications-tab')" style="display: none;">إعدادات الرسائل المالية</button>
-                <button class="tab-button" id="admin-tab-btn" onclick="showTab('admin-tab')" style="display: none;">لوحة المدير</button>
+                <button class="tab-button active" onclick="showTab('company-tab')">🏢 تسجيل شركة جديدة</button>
+                <button class="tab-button" onclick="showTab('user-tab')">👤 إضافة مستخدم فردي</button>
+                <button class="tab-button" onclick="showTab('login-tab')">🔐 تسجيل الدخول</button>
+                <button class="tab-button" onclick="showTab('password-tab')">🔑 إدارة كلمة المرور</button>
+                <button class="tab-button" id="subscribers-tab-btn" onclick="showTab('subscribers-tab')" style="display: none;">👥 إدارة المشتركين</button>
+                <button class="tab-button" id="transactions-tab-btn" onclick="showTab('transactions-tab')" style="display: none;">💰 المعاملات المالية</button>
+                <button class="tab-button" id="notifications-tab-btn" onclick="showTab('notifications-tab')" style="display: none;">📨 إعدادات الرسائل المالية</button>
+                <button class="tab-button" id="admin-tab-btn" onclick="showTab('admin-tab')" style="display: none;">⚙️ لوحة المدير</button>
             </div>
 
             <!-- User Registration Tab -->
-            <div id="user-tab" class="tab-content active">
+            <div id="user-tab" class="tab-content">
                 <!-- User Creation Form -->
                 <div class="form-section">
-                    <h2>إضافة مستخدم جديد</h2>
+                    <h2>👤 إضافة مستخدم جديد</h2>
+                    
+                    <div class="user-note">
+                        <p>⚠️ <strong>ملاحظة:</strong> هذا النموذج لإضافة مستخدمين فرديين. لإنشاء شركة جديدة مع مدير، استخدم تبويب "تسجيل شركة جديدة"</p>
+                    </div>
                     
                     <div id="user-message"></div>
                     
@@ -807,10 +874,22 @@
             </div>
 
             <!-- Company Registration Tab -->
-            <div id="company-tab" class="tab-content">
+            <div id="company-tab" class="tab-content active">
                 <!-- Company Registration Form -->
                 <div class="company-form-section">
-                    <h2>تسجيل شركة جديدة مع تفعيل حساب المدير</h2>
+                    <h2>🏢 تسجيل شركة جديدة مع تفعيل حساب المدير</h2>
+                    
+                    <div class="multi-tenant-info">
+                        <div class="info-card">
+                            <h3>🌟 نظام متعدد الشركات</h3>
+                            <ul>
+                                <li>✅ عزل كامل للبيانات بين الشركات</li>
+                                <li>✅ إدارة منفصلة للمستخدمين والمعاملات</li>
+                                <li>✅ تحكم كامل في صلاحيات الوصول</li>
+                                <li>✅ تقارير وإحصائيات مستقلة لكل شركة</li>
+                            </ul>
+                        </div>
+                    </div>
                     
                     <div id="company-message"></div>
                     
@@ -2020,17 +2099,32 @@
         // Update company selector dropdown
         function updateCompanySelector() {
             const selector = document.getElementById('companySelector');
-            selector.innerHTML = '<option value="">اختر الشركة...</option>';
+            const companyCount = document.getElementById('companyCount');
+            const companyCountNumber = document.getElementById('companyCountNumber');
+            
+            selector.innerHTML = '<option value="">🏢 اختر الشركة...</option>';
             
             accessibleCompanies.forEach(company => {
                 const option = document.createElement('option');
                 option.value = company.id;
-                option.textContent = company.name;
+                option.textContent = `🏢 ${company.name}`;
                 selector.appendChild(option);
             });
             
             if (accessibleCompanies.length > 0) {
                 selector.style.display = 'block';
+                companyCount.style.display = 'block';
+                companyCountNumber.textContent = accessibleCompanies.length;
+                
+                // Show multi-company message if user has access to multiple companies
+                if (accessibleCompanies.length > 1) {
+                    showMessage(
+                        `🎉 مرحباً! لديك وصول إلى ${accessibleCompanies.length} شركات مختلفة. يرجى اختيار الشركة التي تريد العمل معها.`, 
+                        'success'
+                    );
+                }
+            } else {
+                companyCount.style.display = 'none';
             }
         }
 
@@ -2040,9 +2134,10 @@
             const companyId = selector.value;
             
             if (!companyId) {
-                document.getElementById('currentCompany').textContent = 'لم يتم اختيار شركة';
+                document.getElementById('currentCompany').textContent = '🏢 لم يتم اختيار شركة';
                 currentCompanyId = null;
                 hideCompanySpecificTabs();
+                showMessage('يرجى اختيار شركة للبدء في العمل', 'warning');
                 return;
             }
             
@@ -2058,14 +2153,14 @@
                 if (result.success) {
                     currentCompanyId = companyId;
                     const company = accessibleCompanies.find(c => c.id == companyId);
-                    document.getElementById('currentCompany').textContent = `الشركة: ${company.name}`;
+                    document.getElementById('currentCompany').textContent = `🏢 الشركة: ${company.name}`;
                     showCompanySpecificTabs();
                     
                     // Load transaction types and other company-specific data
                     loadTransactionTypes();
                     loadSubscribers();
                     
-                    showMessage('تم تغيير سياق الشركة بنجاح', 'success');
+                    showMessage(`✅ تم تغيير سياق الشركة إلى "${company.name}" بنجاح! جميع البيانات والعمليات الآن منفصلة تماماً عن الشركات الأخرى.`, 'success');
                 } else {
                     showMessage(`خطأ: ${result.message}`, 'error');
                 }
@@ -2086,6 +2181,15 @@
                 if (currentUser && currentUser.role === 'system_admin') {
                     document.getElementById('admin-tab-btn').style.display = 'block';
                 }
+                
+                // Add visual indicator that tabs are company-specific
+                const tabs = ['subscribers-tab-btn', 'transactions-tab-btn', 'notifications-tab-btn'];
+                tabs.forEach(tabId => {
+                    const tab = document.getElementById(tabId);
+                    if (tab) {
+                        tab.title = 'هذا التبويب يعرض البيانات المنفصلة للشركة المحددة فقط';
+                    }
+                });
             }
         }
 
