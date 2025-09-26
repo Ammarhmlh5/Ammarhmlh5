@@ -20,20 +20,36 @@
         }
         
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
             direction: rtl;
+            font-size: 16px;
+            line-height: 1.5;
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 100%;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            padding: 20px 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            min-height: 95vh;
+        }
+        
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .container {
+                max-width: 1000px;
+                padding: 30px;
+                border-radius: 15px;
+                min-height: auto;
+            }
         }
         
         .header {
