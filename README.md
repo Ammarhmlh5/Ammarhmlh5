@@ -54,7 +54,8 @@ Advanced multi-tenant system for company and user management with complete data 
 ### المتطلبات | Requirements
 - Node.js 18+ 
 - npm 9+
-- SQLite (مدمج)
+- SQLite (مدمج) أو PostgreSQL 12+ للإنتاج
+- PostgreSQL (اختياري - للأداء العالي والتطبيقات الإنتاجية)
 
 ### التثبيت | Installation
 ```bash
@@ -65,8 +66,14 @@ cd Ammarhmlh5
 # Install dependencies
 npm install
 
-# Start the server
+# للاستخدام مع SQLite (افتراضي)
+# For SQLite usage (default)
 npm start
+
+# للاستخدام مع PostgreSQL
+# For PostgreSQL usage
+npm run setup-postgres  # إعداد تلقائي
+# أو إعداد يدوي - راجع POSTGRESQL_SETUP_GUIDE.md
 ```
 
 ## 🌐 استخدام النظام | System Usage
@@ -173,7 +180,14 @@ curl -X GET http://localhost:3000/api/admin/statistics
 - **transaction_counters**: عدادات الأرقام الإلكترونية
 - **transactions**: المعاملات المالية مع عزل الشركات
 - **accounts**: دليل الحسابات مع فصل الشركات
+- **subscribers**: إدارة المشتركين مع البيانات التفصيلية  
 - **admin_logs**: سجلات نشاط المديرين
+- **notification_settings**: إعدادات الإشعارات المالية
+- **message_templates**: قوالب الرسائل القابلة للتخصيص
+- **notification_logs**: سجلات تسليم الإشعارات
+
+> 🐘 **جديد**: دعم شامل لـ PostgreSQL للأداء العالي والتطبيقات الإنتاجية  
+> راجع [دليل إعداد PostgreSQL](POSTGRESQL_SETUP_GUIDE.md) للتفاصيل الكاملة
 
 ## 🧪 الاختبار | Testing
 
