@@ -2225,8 +2225,14 @@
             // Show selected tab
             document.getElementById(tabId).classList.add('active');
             
-            // Activate corresponding button
-            event.target.classList.add('active');
+            // Activate corresponding button - find button by onclick attribute
+            const targetButton = Array.from(tabButtons).find(btn => {
+                const onclick = btn.getAttribute('onclick');
+                return onclick && onclick.includes(`'${tabId}'`);
+            });
+            if (targetButton) {
+                targetButton.classList.add('active');
+            }
             
             // Load data for specific tabs
             if (tabId === 'transactions-tab' && currentCompanyId) {
@@ -2412,7 +2418,7 @@
                 
                 if (result.success) {
                     currentUser = result.user;
-                    updateUIForLoggedInUser();
+                    await updateUIForLoggedInUser();
                 } else {
                     updateUIForLoggedOutUser();
                 }
@@ -2423,7 +2429,7 @@
         }
 
         // Update UI for logged in user
-        function updateUIForLoggedInUser() {
+        async function updateUIForLoggedInUser() {
             document.getElementById('userInfo').style.display = 'block';
             document.getElementById('userEmail').textContent = currentUser.email;
             
@@ -2434,14 +2440,28 @@
             document.getElementById('changePasswordSection').style.display = 'block';
             document.getElementById('setPasswordSection').style.display = 'none';
             
+            // Load accessible companies
+            await loadAccessibleCompanies();
+            
             // Update tab visibility based on user role
             updateCompanySpecificTabs();
             
-            // Load admin data if user is system admin
+            // Navigate to appropriate tab based on user role
             if (currentUser && currentUser.role === 'system_admin') {
+                // For system admin, show admin tab
+                showTab('admin-tab');
                 loadSystemStatistics();
                 loadCompaniesManagement();
                 loadActivityLogs();
+            } else {
+                // For regular users, show password management tab
+                showTab('password-tab');
+            }
+            
+            // Auto-select primary company if available
+            if (currentUser.company_id && accessibleCompanies.some(c => c.id == currentUser.company_id)) {
+                document.getElementById('companySelector').value = currentUser.company_id;
+                await switchCompany();
             }
         }
 
@@ -2504,7 +2524,7 @@
                 if (result.success) {
                     showMessage(result.message, 'success', 'login-message');
                     currentUser = result.user;
-                    updateUIForLoggedInUser();
+                    await updateUIForLoggedInUser();
                     this.reset();
                 } else {
                     showMessage(result.message, 'error', 'login-message');
