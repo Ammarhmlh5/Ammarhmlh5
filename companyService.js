@@ -1,4 +1,5 @@
 const Database = require('./database');
+const bcrypt = require('bcrypt');
 
 class CompanyService {
   constructor() {
@@ -76,7 +77,7 @@ class CompanyService {
         throw new Error(`خطأ في التحقق من البيانات: ${validationErrors.join(', ')}`);
       }
 
-      const { name, email, phone, address, description, adminName, adminEmail, adminPhone } = companyData;
+      const { name, email, phone, address, description, adminName, adminEmail, adminPhone, adminPassword } = companyData;
 
       // Clean and prepare company data
       const cleanCompanyData = {
@@ -95,6 +96,13 @@ class CompanyService {
         role: 'admin',
         is_active: 1
       };
+      
+      // Add password if provided
+      if (adminPassword) {
+        console.log('Hashing password for admin:', adminEmail);
+        cleanAdminData.password = await bcrypt.hash(adminPassword, 10);
+        console.log('Password hashed successfully');
+      }
 
       // Save company first
       const savedCompany = await this.database.saveCompany(cleanCompanyData);
@@ -102,6 +110,7 @@ class CompanyService {
       // Add company_id to admin data
       cleanAdminData.company_id = savedCompany.id;
 
+      console.log('Saving admin user with data:', { ...cleanAdminData, password: cleanAdminData.password ? '[HASHED]' : null });
       // Save admin user
       const savedAdmin = await this.database.saveUser(cleanAdminData);
 

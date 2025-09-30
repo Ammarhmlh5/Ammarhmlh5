@@ -474,7 +474,7 @@ class Database {
   // Save a new user to the database
   async saveUser(userData) {
     return new Promise((resolve, reject) => {
-      const { name, email, phone, company_id, role, is_active } = userData;
+      const { name, email, phone, company_id, role, is_active, password } = userData;
       
       // Validate required fields
       if (!name || !email) {
@@ -482,14 +482,14 @@ class Database {
       }
 
       const insertQuery = `
-        INSERT INTO users (name, email, phone, company_id, role, is_active)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO users (name, email, phone, company_id, role, is_active, password)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
 
       const userRole = role || 'user';
       const activeStatus = is_active !== undefined ? is_active : 1;
 
-      this.db.run(insertQuery, [name, email, phone, company_id || null, userRole, activeStatus], function(err) {
+      this.db.run(insertQuery, [name, email, phone, company_id || null, userRole, activeStatus, password || null], function(err) {
         if (err) {
           if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' || err.message.includes('UNIQUE constraint failed')) {
             reject(new Error('البريد الإلكتروني موجود بالفعل'));
