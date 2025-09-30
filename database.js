@@ -788,15 +788,23 @@ class Database {
   // Get user's accessible companies
   async getUserAccessibleCompanies(userId) {
     return new Promise((resolve, reject) => {
+      // Query to get companies from both user_company_access and direct company_id
       const query = `
-        SELECT c.*, uca.role as access_role, uca.is_active as access_active
+        SELECT DISTINCT c.*, 
+               COALESCE(uca.role, u.role) as access_role, 
+               COALESCE(uca.is_active, 1) as access_active
         FROM companies c
-        INNER JOIN user_company_access uca ON c.id = uca.company_id
-        WHERE uca.user_id = ? AND uca.is_active = 1 AND c.subscription_status = 'active'
+        LEFT JOIN user_company_access uca ON c.id = uca.company_id AND uca.user_id = ?
+        LEFT JOIN users u ON c.id = u.company_id AND u.id = ?
+        WHERE c.subscription_status = 'active'
+          AND (
+            (uca.user_id = ? AND uca.is_active = 1)
+            OR u.id = ?
+          )
         ORDER BY c.name
       `;
       
-      this.db.all(query, [userId], (err, rows) => {
+      this.db.all(query, [userId, userId, userId, userId], (err, rows) => {
         if (err) {
           console.error('خطأ في جلب شركات المستخدم:', err.message);
           reject(err);

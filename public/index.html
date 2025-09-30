@@ -1518,10 +1518,10 @@
         <div class="main-content">
             <!-- Tab Navigation -->
             <div class="tab-navigation">
-                <button class="tab-button active" onclick="showTab('company-tab')">🏢 تسجيل شركة جديدة</button>
-                <button class="tab-button" onclick="showTab('user-tab')">👤 إضافة مستخدم فردي</button>
-                <button class="tab-button" onclick="showTab('login-tab')">🔐 تسجيل الدخول</button>
-                <button class="tab-button" onclick="showTab('password-tab')">🔑 إدارة كلمة المرور</button>
+                <button class="tab-button active" id="company-tab-btn" onclick="showTab('company-tab')">🏢 تسجيل شركة جديدة</button>
+                <button class="tab-button" id="user-tab-btn" onclick="showTab('user-tab')">👤 إضافة مستخدم فردي</button>
+                <button class="tab-button" id="login-tab-btn" onclick="showTab('login-tab')">🔐 تسجيل الدخول</button>
+                <button class="tab-button" id="password-tab-btn" onclick="showTab('password-tab')">🔑 إدارة كلمة المرور</button>
                 <button class="tab-button" id="subscribers-tab-btn" onclick="showTab('subscribers-tab')" style="display: none;">👥 إدارة المشتركين</button>
                 <button class="tab-button" id="transactions-tab-btn" onclick="showTab('transactions-tab')" style="display: none;">💰 المعاملات المالية</button>
                 <button class="tab-button" id="notifications-tab-btn" onclick="showTab('notifications-tab')" style="display: none;">📨 إعدادات الرسائل المالية</button>
@@ -2433,6 +2433,11 @@
             document.getElementById('userInfo').style.display = 'block';
             document.getElementById('userEmail').textContent = currentUser.email;
             
+            // Hide registration tabs for logged-in users
+            document.getElementById('company-tab-btn').style.display = 'none';
+            document.getElementById('user-tab-btn').style.display = 'none';
+            document.getElementById('login-tab-btn').style.display = 'none';
+            
             // Show logout button in navigation bar
             document.getElementById('logout-tab-btn').style.display = 'block';
             
@@ -2446,22 +2451,26 @@
             // Update tab visibility based on user role
             updateCompanySpecificTabs();
             
-            // Navigate to appropriate tab based on user role
+            // Auto-select primary company if available
+            if (currentUser.company_id && accessibleCompanies.some(c => c.id == currentUser.company_id)) {
+                document.getElementById('companySelector').value = currentUser.company_id;
+                await switchCompany();
+            }
+            
+            // Navigate to appropriate tab based on user role and company selection
             if (currentUser && currentUser.role === 'system_admin') {
                 // For system admin, show admin tab
                 showTab('admin-tab');
                 loadSystemStatistics();
                 loadCompaniesManagement();
                 loadActivityLogs();
+            } else if (currentCompanyId) {
+                // For company users with selected company, show subscribers tab (first work screen)
+                showTab('subscribers-tab');
+                loadSubscribers();
             } else {
-                // For regular users, show password management tab
+                // If no company selected yet, show password management tab
                 showTab('password-tab');
-            }
-            
-            // Auto-select primary company if available
-            if (currentUser.company_id && accessibleCompanies.some(c => c.id == currentUser.company_id)) {
-                document.getElementById('companySelector').value = currentUser.company_id;
-                await switchCompany();
             }
         }
 
@@ -2469,6 +2478,11 @@
         function updateUIForLoggedOutUser() {
             document.getElementById('userInfo').style.display = 'none';
             currentUser = null;
+            
+            // Show registration tabs for logged-out users
+            document.getElementById('company-tab-btn').style.display = 'block';
+            document.getElementById('user-tab-btn').style.display = 'block';
+            document.getElementById('login-tab-btn').style.display = 'block';
             
             // Hide logout button in navigation bar
             document.getElementById('logout-tab-btn').style.display = 'none';
