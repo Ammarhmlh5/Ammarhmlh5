@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const Database = require('./database');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 async function verifyUserLogin() {
   const database = new Database();
